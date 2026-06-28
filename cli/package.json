@@ -1,0 +1,27 @@
+{
+  "name": "@ai-compiler/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "aicompiler": "./bin/aicompiler.js",
+    "aivm": "./bin/aivm.js"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@ai-compiler/core": "*",
+    "@ai-sdk/anthropic": "^4.0.1",
+    "@ai-sdk/amazon-bedrock": "^5.0.2",
+    "ai": "^7.0.4",
+    "chalk": "^5.6.2",
+    "commander": "^15.0.0",
+    "ora": "^9.4.1"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

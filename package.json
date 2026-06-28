@@ -1,0 +1,20 @@
+{
+  "name": "ai-compiler",
+  "private": true,
+  "workspaces": [
+    "packages/core",
+    "workers/aivm-worker",
+    "web",
+    "cli"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev:worker": "npm run dev --workspace=workers/aivm-worker",
+    "dev:web": "npm run dev --workspace=web",
+    "deploy:worker": "npm run deploy --workspace=workers/aivm-worker",
+    "deploy:web": "npm run deploy --workspace=web"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

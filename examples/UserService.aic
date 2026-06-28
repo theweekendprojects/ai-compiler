@@ -1,0 +1,27 @@
+module UserService
+version 1.0
+
+context:
+  A REST API for managing users in a PostgreSQL database.
+
+tools: [database, http]
+
+intent getAdultUsers:
+  Get all users from the database where age is above 18.
+  Return as a list sorted by name ascending.
+
+  input:
+    - none
+
+  output:
+    - array of user objects with fields: id, name, email, age
+
+intent findByEmail:
+  Find a single user by their email address.
+  Return null if not found.
+
+  input:
+    - email: the email address to search for
+
+  output:
+    - user object or null

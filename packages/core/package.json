@@ -1,0 +1,15 @@
+{
+  "name": "@ai-compiler/core",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./parser": "./src/parser/index.ts",
+    "./compiler": "./src/compiler/index.ts",
+    "./vm": "./src/vm/index.ts",
+    "./types": "./src/types/index.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

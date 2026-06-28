@@ -1,0 +1,17 @@
+module HelloWorld
+version 1.0
+
+context:
+  A simple hello world example to demonstrate the AI compiler.
+
+tools: [console]
+
+intent sayHello:
+  Say hello to the world in a creative and inspiring way.
+  Include a motivational quote about programming and the future of AI.
+
+  input:
+    - none
+
+  output:
+    - a greeting message with a motivational quote
