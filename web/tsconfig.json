@@ -1,9 +1,14 @@
 {
-  "extends": "../../tsconfig.base.json",
-  "include": ["src", "astro.config.mjs"],
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist"],
   "compilerOptions": {
     "jsx": "react-jsx",
     "jsxImportSource": "react",
-    "types": ["@cloudflare/workers-types", "astro/client"]
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "types": ["astro/client"]
   }
 }

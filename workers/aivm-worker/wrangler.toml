@@ -5,14 +5,12 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 ENVIRONMENT = "production"
+DEFAULT_PROVIDER = "workers-ai"
 
-# Secrets (set via: wrangler secret put <NAME>)
-# ANTHROPIC_API_KEY
-# AWS_ACCESS_KEY_ID
+# Secrets (set via wrangler secret put <NAME>):
+# CF_ACCOUNT_ID   — your Cloudflare account ID
+# CF_API_TOKEN    — a CF API token with Workers AI read permission
+# ANTHROPIC_API_KEY  (optional — for Claude provider)
+# AWS_ACCESS_KEY_ID  (optional — for Bedrock/Nova Micro)
 # AWS_SECRET_ACCESS_KEY
-# CF_GATEWAY_URL  (optional — Cloudflare AI Gateway base URL)
-
-[[rules]]
-type = "Text"
-globs = ["**/*.md"]
-fallthrough = true
+# CF_GATEWAY_URL     (optional — route via CF AI Gateway)

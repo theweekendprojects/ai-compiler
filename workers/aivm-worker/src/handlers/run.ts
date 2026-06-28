@@ -7,7 +7,7 @@ import type { Env } from '../types.js';
 const schema = z.object({
   aiop: z.record(z.any()),
   inputs: z.record(z.string()).optional().default({}),
-  provider: z.enum(['anthropic', 'bedrock']).optional(),
+  provider: z.enum(['anthropic', 'bedrock', 'workers-ai']).optional(),
   model: z.string().optional(),
   simulate: z.boolean().optional().default(false),
 });
@@ -25,8 +25,9 @@ export async function runHandler(c: Context<{ Bindings: Env }>) {
   const model    = body.model    ?? aiop.steps[0]?.model;
 
   const vm = new AiVM({
-    provider: { provider: provider as any, model: model ?? 'claude-opus-4-5' },
+    provider: { provider: provider as any, model: model ?? '@cf/meta/llama-3.1-8b-instruct' },
     simulate: body.simulate,
+    workersAiBinding:   { accountId: c.env.CF_ACCOUNT_ID, apiToken: c.env.CF_API_TOKEN },
     anthropicApiKey:    c.env.ANTHROPIC_API_KEY,
     awsAccessKeyId:     c.env.AWS_ACCESS_KEY_ID,
     awsSecretAccessKey: c.env.AWS_SECRET_ACCESS_KEY,

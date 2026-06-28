@@ -88,7 +88,7 @@ export interface WorkflowExecutionResult {
 
 // ─── Provider config ──────────────────────────────────────────────────────────
 
-export type SupportedProvider = 'anthropic' | 'bedrock';
+export type SupportedProvider = 'anthropic' | 'bedrock' | 'workers-ai';
 
 export interface ProviderConfig {
   provider: SupportedProvider;

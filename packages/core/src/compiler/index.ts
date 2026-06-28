@@ -96,7 +96,8 @@ ${steps}`;
 
 export interface CompilerOptions {
   provider?: ProviderConfig;
-  context?: string;      // content of context.md
+  context?: string;
+  workersAiBinding?: any;   // CF AI binding — passed through to model factory
   anthropicApiKey?: string;
   awsAccessKeyId?: string;
   awsSecretAccessKey?: string;
@@ -105,16 +106,26 @@ export interface CompilerOptions {
 }
 
 function getModel(opts: CompilerOptions) {
-  const provider = opts.provider?.provider ?? 'anthropic';
-  const model    = opts.provider?.model    ?? 'claude-opus-4-5';
+  const provider = opts.provider?.provider ?? 'workers-ai';
+  const model    = opts.provider?.model;
   const baseURL  = opts.cfGatewayUrl;
+
+  if (provider === 'workers-ai') {
+    const { createOpenAI } = require('@ai-sdk/openai');
+    const binding = opts.workersAiBinding as { accountId: string; apiToken: string };
+    const cfOpenAI = createOpenAI({
+      baseURL: `https://api.cloudflare.com/client/v4/accounts/${binding.accountId}/ai/v1`,
+      apiKey: binding.apiToken,
+    });
+    return cfOpenAI(model ?? '@cf/meta/llama-3.1-8b-instruct');
+  }
 
   if (provider === 'anthropic') {
     const anthropic = createAnthropic({
       apiKey: opts.anthropicApiKey,
       ...(baseURL && { baseURL: `${baseURL}/anthropic` }),
     });
-    return anthropic(model);
+    return anthropic(model ?? 'claude-opus-4-5');
   }
 
   if (provider === 'bedrock') {
@@ -124,7 +135,7 @@ function getModel(opts: CompilerOptions) {
       secretAccessKey: opts.awsSecretAccessKey,
       ...(baseURL && { baseURL: `${baseURL}/aws-bedrock` }),
     });
-    return bedrock(model);
+    return bedrock(model ?? 'us.amazon.nova-micro-v1:0');
   }
 
   throw new Error(`Unsupported provider: ${provider}`);

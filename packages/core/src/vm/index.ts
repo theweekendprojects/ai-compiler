@@ -24,7 +24,10 @@ import type {
 
 export interface AiVMConfig {
   provider?: ProviderConfig;
-  simulate?: boolean;          // if true — mock tool outputs, no real LLM needed for tools
+  simulate?: boolean;
+  // Workers AI binding (passed from CF Worker env)
+  workersAiBinding?: any;
+  // Other provider credentials
   anthropicApiKey?: string;
   awsAccessKeyId?: string;
   awsSecretAccessKey?: string;
@@ -161,8 +164,21 @@ export class AiVM {
   }
 
   private getModel() {
-    const p   = this.config.provider!;
-    const gw  = this.config.cfGatewayUrl;
+    const p  = this.config.provider!;
+    const gw = this.config.cfGatewayUrl;
+
+    if (p.provider === 'workers-ai') {
+      // Cloudflare Workers AI via OpenAI-compatible REST endpoint
+      // baseURL: https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1
+      // workersAiBinding is the account_id + api_token pair passed as { accountId, apiToken }
+      const { createOpenAI } = require('@ai-sdk/openai');
+      const binding = this.config.workersAiBinding as { accountId: string; apiToken: string };
+      const cfOpenAI = createOpenAI({
+        baseURL: `https://api.cloudflare.com/client/v4/accounts/${binding.accountId}/ai/v1`,
+        apiKey: binding.apiToken,
+      });
+      return cfOpenAI(p.model ?? '@cf/meta/llama-3.1-8b-instruct');
+    }
 
     if (p.provider === 'anthropic') {
       const anthropic = createAnthropic({

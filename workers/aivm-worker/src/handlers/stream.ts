@@ -8,7 +8,7 @@ const schema = z.object({
   aiop: z.record(z.any()).optional(),
   source: z.string().optional(),
   inputs: z.record(z.string()).optional().default({}),
-  provider: z.enum(['anthropic', 'bedrock']).optional().default('anthropic'),
+  provider: z.enum(['anthropic', 'bedrock', 'workers-ai']).optional().default('workers-ai'),
   model: z.string().optional(),
   simulate: z.boolean().optional().default(false),
   context: z.string().optional(),

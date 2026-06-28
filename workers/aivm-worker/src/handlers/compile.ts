@@ -5,7 +5,7 @@ import type { Env } from '../types.js';
 
 const schema = z.object({
   source: z.string().min(1, 'source is required'),
-  provider: z.enum(['anthropic', 'bedrock']).optional().default('anthropic'),
+  provider: z.enum(['anthropic', 'bedrock', 'workers-ai']).optional().default('workers-ai'),
   model: z.string().optional(),
   context: z.string().optional(), // content of context.md
 });
@@ -36,14 +36,17 @@ export async function compileHandler(c: Context<{ Bindings: Env }>) {
     const aiop = await compile(workflow, body.source, {
       provider: {
         provider: body.provider,
-        model: body.model ?? 'claude-opus-4-5',
+        model: body.model ?? (body.provider === 'workers-ai'
+          ? '@cf/meta/llama-3.1-8b-instruct'
+          : 'claude-opus-4-5'),
       },
       context: body.context,
-      anthropicApiKey: c.env.ANTHROPIC_API_KEY,
-      awsAccessKeyId: c.env.AWS_ACCESS_KEY_ID,
+      workersAiBinding: { accountId: c.env.CF_ACCOUNT_ID, apiToken: c.env.CF_API_TOKEN },
+      anthropicApiKey:    c.env.ANTHROPIC_API_KEY,
+      awsAccessKeyId:     c.env.AWS_ACCESS_KEY_ID,
       awsSecretAccessKey: c.env.AWS_SECRET_ACCESS_KEY,
-      awsRegion: c.env.AWS_REGION,
-      cfGatewayUrl: c.env.CF_GATEWAY_URL,
+      awsRegion:          c.env.AWS_REGION,
+      cfGatewayUrl:       c.env.CF_GATEWAY_URL,
     });
 
     return c.json(aiop);
