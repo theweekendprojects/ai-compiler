@@ -4,6 +4,8 @@
 
 **[aicompiler.dev](https://aicompiler.dev)** — try the live demo, no account needed.
 
+![AI Compiler demo](docs/screenshots/demo.gif)
+
 ```
 .aic  →  aicompiler compile  →  .aix  →  aivm run  →  output
 ```
