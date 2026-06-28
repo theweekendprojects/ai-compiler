@@ -13,12 +13,50 @@
 import { useState, useRef, useCallback } from "react";
 import Editor from "@monaco-editor/react";
 
-const WORKER_URL = import.meta.env.PUBLIC_WORKER_URL ?? "https://aivm-worker.theweekendprojects.workers.dev";
+const WORKER_URL = import.meta.env.PUBLIC_WORKER_URL ?? "https://aivm-worker.mineme-shahriar.workers.dev";
 
 // ─── Examples ─────────────────────────────────────────────────────────────────
 
-const EXAMPLES = {
-  refund: `# Workflow: ProcessRefund
+interface Example {
+  source: string;
+  simulate: boolean;
+  simulateReason?: string; // shown when simulate=true
+  inputs?: Record<string, string>;
+}
+
+const EXAMPLES: Record<string, Example> = {
+  hello: {
+    simulate: false, // ✅ Real LLM — no tools needed
+    inputs: { name: 'Shahriar' },
+    source: `# Workflow: HelloWorld
+
+## Description
+A creative hello world demonstration.
+No tools needed — just the AI VM thinking.
+
+## Inputs
+- name: the name to greet
+
+## Steps
+
+### 1. WriteGreeting
+Write a warm, creative greeting for {name}.
+Make it feel personal and inspiring.
+Reference the idea that they are writing
+intent, not instructions, as a programmer.
+
+### 2. AddQuote
+Add a short original quote about the future
+of AI-native programming to the greeting
+from {WriteGreeting.greeting}.
+Keep it under two sentences.`,
+  },
+
+  refund: {
+    simulate: true,
+    simulateReason: 'This workflow uses PostgreSQL, Stripe and SendGrid. In production you would connect real tool adapters via aivm.config.json — the AI VM would call them for real.',
+    inputs: { orderId: 'ORD-123' },
+    source: `# Workflow: ProcessRefund
 
 ## Description
 Processes a customer refund. Validates eligibility,
@@ -58,8 +96,13 @@ Set refundConfirmationId to {IssueRefund.refundConfirmationId}.
 Send a confirmation email to {LoadOrder.customerEmail}.
 Include the refund amount {LoadOrder.total} and {IssueRefund.refundConfirmationId}.
 If email fails, log the error but do not halt the workflow.`,
+  },
 
-  createUser: `# Workflow: CreateUser
+  createUser: {
+    simulate: true,
+    simulateReason: 'This workflow uses PostgreSQL and SendGrid. Connect real adapters via aivm.config.json to execute against a live database and email provider.',
+    inputs: { name: 'Shahriar', email: 'shahriar@example.com' },
+    source: `# Workflow: CreateUser
 
 ## Description
 Creates a new user account, sends a welcome email,
@@ -92,6 +135,7 @@ Send a welcome email to {email}.
 Address the user by {name}.
 Include their new account details and a getting-started guide link.
 If email fails, log the error but do not halt the workflow.`,
+  },
 };
 
 // ─── Types (adapted from AgentStep in versatile-execution-agent) ──────────────
@@ -143,13 +187,14 @@ const STATUS_BG: Record<StepStatus, string> = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function LiveDemo() {
-  const [source, setSource] = useState(EXAMPLES.refund);
+  const [activeExample, setActiveExample] = useState<string>('hello');
+  const [source, setSource] = useState(EXAMPLES.hello.source);
   const [activePanel, setActivePanel] = useState<Panel>('source');
   const [aix, setaix] = useState<object | null>(null);
   const [steps, setSteps] = useState<LiveStep[]>([]);
   const [workflowStatus, setWorkflowStatus] = useState<'idle' | 'compiling' | 'running' | 'success' | 'failed' | 'partial'>('idle');
   const [error, setError] = useState<string | null>(null);
-  const [simulate, setSimulate] = useState(true); // default: simulation for demo
+  const [simulate, setSimulate] = useState(false); // hello starts with real LLM
   const logRef = useRef<HTMLDivElement>(null);
 
   // scroll execution log to bottom — pattern from live-panel/ResponseDisplay.tsx
@@ -176,7 +221,11 @@ export function LiveDemo() {
       const res = await fetch(`${WORKER_URL}/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ source, simulate }),
+        body: JSON.stringify({
+          source,
+          simulate,
+          inputs: EXAMPLES[activeExample]?.inputs ?? {},
+        }),
       });
 
       if (!res.ok) {
@@ -284,38 +333,57 @@ export function LiveDemo() {
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs text-[var(--color-muted)]">Examples:</span>
-          {(Object.keys(EXAMPLES) as ExampleKey[]).map(key => (
-            <button
-              key={key}
-              onClick={() => {
-                setSource(EXAMPLES[key]);
-                setActivePanel('source');
-                setaix(null);
-                setSteps([]);
-                setError(null);
-                setWorkflowStatus('idle');
-              }}
-              className="badge badge-purple cursor-pointer hover:opacity-80 transition-opacity"
-            >
-              {key}
-            </button>
-          ))}
+          {(Object.keys(EXAMPLES) as string[]).map(key => {
+            const ex = EXAMPLES[key];
+            const isActive = key === activeExample;
+            return (
+              <button
+                key={key}
+                onClick={() => {
+                  setActiveExample(key);
+                  setSource(ex.source);
+                  setSimulate(ex.simulate);
+                  setActivePanel('source');
+                  setaix(null);
+                  setSteps([]);
+                  setError(null);
+                  setWorkflowStatus('idle');
+                }}
+                className={`badge cursor-pointer hover:opacity-90 transition-all ${isActive ? 'badge-purple ring-1 ring-violet-400' : 'badge-purple opacity-60'}`}
+              >
+                {!ex.simulate && <span className="mr-1">🤖</span>}
+                {ex.simulate  && <span className="mr-1">🎭</span>}
+                {key}
+              </button>
+            );
+          })}
         </div>
-        <div className="flex items-center gap-3">
-          <label className="flex items-center gap-2 text-xs text-[var(--color-muted)] cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={simulate}
-              onChange={e => setSimulate(e.target.checked)}
-              className="accent-violet-500"
-            />
-            Simulation mode
-          </label>
-          {simulate && (
-            <span className="badge badge-cyan text-xs">No real tools called</span>
+
+        {/* Mode indicator */}
+        <div className="flex items-center gap-2">
+          {!simulate ? (
+            <span className="badge badge-green text-xs flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
+              Real AI — Llama 3.3 70B
+            </span>
+          ) : (
+            <span className="badge badge-cyan text-xs flex items-center gap-1">
+              🎭 Simulated — tool calls mocked
+            </span>
           )}
         </div>
       </div>
+
+      {/* ── simulation banner — shown when tools would be needed ── */}
+      {simulate && EXAMPLES[activeExample]?.simulateReason && (
+        <div className="mb-4 p-3 rounded-lg border border-cyan-500/20 bg-cyan-500/5 flex gap-3 items-start">
+          <span className="text-cyan-400 text-lg leading-none mt-0.5">💡</span>
+          <div>
+            <p className="text-xs text-cyan-300 font-semibold mb-0.5">Why is this simulated?</p>
+            <p className="text-xs text-[var(--color-muted)] leading-relaxed">{EXAMPLES[activeExample].simulateReason}</p>
+          </div>
+        </div>
+      )}
 
       {/* ── 3-panel grid ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
@@ -434,8 +502,10 @@ export function LiveDemo() {
                     <span className="text-xs text-[var(--color-muted)] font-mono">{step.id}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {step.simulated && (
-                      <span className="badge badge-cyan text-xs">simulated</span>
+                    {step.status !== 'pending' && (
+                      step.simulated
+                        ? <span className="text-xs badge badge-cyan">🎭 simulated</span>
+                        : <span className="text-xs badge badge-green">🤖 real AI</span>
                     )}
                     {step.duration_ms !== undefined && (
                       <span className="text-xs text-[var(--color-muted)] font-mono">{step.duration_ms}ms</span>
