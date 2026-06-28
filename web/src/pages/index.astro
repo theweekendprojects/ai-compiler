@@ -35,21 +35,30 @@ import "../styles/global.css";
   <section class="relative z-10 text-center px-6 pt-16 pb-12 max-w-5xl mx-auto">
     <div class="inline-flex items-center gap-2 badge badge-purple mb-6">
       <span class="w-2 h-2 rounded-full bg-violet-400 animate-pulse"></span>
-      The first AI-native programming language
+      Not a framework. Not an agent wrapper. A new computing paradigm.
     </div>
 
     <h1 class="text-5xl md:text-7xl font-black tracking-tight leading-tight mb-6">
-      Write <span class="gradient-text">intent.</span><br />
-      Not instructions.
+      The first language where<br />
+      <span class="gradient-text">the LLM is the CPU.</span>
     </h1>
 
-    <p class="text-lg md:text-xl text-[var(--color-muted)] max-w-2xl mx-auto mb-10 leading-relaxed">
-      AI Compiler is a programming language where you write <em>what</em> to do, not how.<br class="hidden md:block" />
-      It compiles to bytecode. The AI VM executes it. Minimal syntax. Zero boilerplate.
+    <p class="text-lg md:text-xl text-[var(--color-muted)] max-w-3xl mx-auto mb-6 leading-relaxed">
+      You write <strong class="text-white">.aic</strong> — plain Markdown, no code.<br class="hidden md:block" />
+      aiCompiler removes all ambiguity at compile time.<br class="hidden md:block" />
+      aiVM executes step by step. The LLM reads opcodes like a CPU reads machine code.
     </p>
 
+    <!-- Positioning line -->
+    <div class="glass inline-flex px-5 py-3 mb-10 text-sm text-[var(--color-muted)] max-w-2xl mx-auto text-left">
+      <div class="space-y-1">
+        <div><span class="text-[var(--color-muted)]">LangChain / LangGraph →</span> <span class="text-white">developers orchestrate LLM steps in Python</span></div>
+        <div><span class="text-violet-400 font-bold">aiCompiler →</span> <span class="text-white">anyone writes intent in Markdown. LLM IS the runtime.</span></div>
+      </div>
+    </div>
+
     <div class="flex flex-wrap items-center justify-center gap-4 mb-12">
-      <a href="#demo" class="btn-primary text-base px-8 py-3">▶ Try the live demo</a>
+      <a href="#demo" class="btn-primary text-base px-8 py-3">▶ Try it now — no install, no signup</a>
       <a href="https://github.com/theweekendprojects/ai-compiler" target="_blank" class="btn-ghost text-base px-8 py-3">View on GitHub</a>
     </div>
 
@@ -70,18 +79,32 @@ import "../styles/global.css";
       </div>
     </div>
 
-    <!-- Social proof numbers -->
-    <div class="flex flex-wrap justify-center gap-8 mt-10 text-center">
-      {[
-        { value: "0", label: "lines of boilerplate" },
-        { value: "∞", label: "models supported" },
-        { value: "2", label: "steps: compile + run" },
-      ].map(s => (
-        <div>
-          <div class="text-3xl font-black gradient-text">{s.value}</div>
-          <div class="text-sm text-[var(--color-muted)] mt-1">{s.label}</div>
-        </div>
-      ))}
+    <!-- Era table -->
+    <div class="mt-10 overflow-x-auto">
+      <table class="mx-auto text-sm border-collapse">
+        <thead>
+          <tr class="text-[var(--color-muted)] text-xs uppercase tracking-wider">
+            <th class="px-6 py-2 text-left">Era</th>
+            <th class="px-6 py-2 text-left">Language</th>
+            <th class="px-6 py-2 text-left">Compiler</th>
+            <th class="px-6 py-2 text-left">CPU</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[
+            { era: "1950s", lang: "Assembly", compiler: "Assembler", cpu: "Silicon" },
+            { era: "1990s", lang: "Java", compiler: "javac", cpu: "JVM" },
+            { era: "2026", lang: ".aic", compiler: "aiCompiler", cpu: "LLM", highlight: true },
+          ].map(row => (
+            <tr class={row.highlight ? "text-white font-bold" : "text-[var(--color-muted)]"}>
+              <td class={`px-6 py-2 border-t border-[var(--color-border)] ${row.highlight ? "text-violet-400" : ""}`}>{row.era}</td>
+              <td class={`px-6 py-2 border-t border-[var(--color-border)] font-mono ${row.highlight ? "text-[var(--color-primary-glow)]" : ""}`}>{row.lang}</td>
+              <td class={`px-6 py-2 border-t border-[var(--color-border)] font-mono ${row.highlight ? "text-[var(--color-accent)]" : ""}`}>{row.compiler}</td>
+              <td class={`px-6 py-2 border-t border-[var(--color-border)] font-mono ${row.highlight ? "text-[var(--color-accent-2)]" : ""}`}>{row.cpu}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   </section>
 
@@ -93,8 +116,8 @@ import "../styles/global.css";
           Try it <span class="gradient-text">right now</span>
         </h2>
         <p class="text-[var(--color-muted)] max-w-xl mx-auto">
-          Write your intent in the editor. Click <strong class="text-white">Run it now</strong>. Watch the AI VM execute it live.
-          No account. No setup. No API key needed.
+          Write a workflow in the editor. Watch aiCompiler resolve the intent. Watch aiVM execute it step by step — the LLM reading opcodes like a CPU.
+          No account. No install. No API key.
         </p>
       </div>
       <LiveDemo client:load />
