@@ -25,7 +25,7 @@ export async function runHandler(c: Context<{ Bindings: Env }>) {
   const model    = body.model    ?? aiop.steps[0]?.model;
 
   const vm = new AiVM({
-    provider: { provider: provider as any, model: model ?? '@cf/meta/llama-3.1-8b-instruct' },
+    provider: { provider: provider as any, model: model ?? '@cf/meta/llama-3.3-70b-instruct-fp8-fast' },
     simulate: body.simulate,
     workersAiBinding:   { accountId: c.env.CF_ACCOUNT_ID, apiToken: c.env.CF_API_TOKEN },
     anthropicApiKey:    c.env.ANTHROPIC_API_KEY,

@@ -52,8 +52,9 @@ export async function streamHandler(c: Context<{ Bindings: Env }>) {
           send({ type: 'compiling' });
           const workflow = parseAic(body.source);
           aiop = await compile(workflow, body.source, {
-            provider: { provider: body.provider, model: body.model ?? 'claude-opus-4-5' },
+            provider: { provider: body.provider, model: body.model ?? '@cf/meta/llama-3.3-70b-instruct-fp8-fast' },
             context: body.context,
+            workersAiBinding:   { accountId: c.env.CF_ACCOUNT_ID, apiToken: c.env.CF_API_TOKEN },
             anthropicApiKey:    c.env.ANTHROPIC_API_KEY,
             awsAccessKeyId:     c.env.AWS_ACCESS_KEY_ID,
             awsSecretAccessKey: c.env.AWS_SECRET_ACCESS_KEY,
@@ -70,8 +71,9 @@ export async function streamHandler(c: Context<{ Bindings: Env }>) {
         // rather than waiting for the full result.
         const { AiVM: AiVMClass } = await import('@ai-compiler/core');
         const vm = new AiVMClass({
-          provider: { provider: body.provider, model: body.model ?? 'claude-opus-4-5' },
+          provider: { provider: body.provider, model: body.model ?? '@cf/meta/llama-3.3-70b-instruct-fp8-fast' },
           simulate: body.simulate,
+          workersAiBinding:   { accountId: c.env.CF_ACCOUNT_ID, apiToken: c.env.CF_API_TOKEN },
           anthropicApiKey:    c.env.ANTHROPIC_API_KEY,
           awsAccessKeyId:     c.env.AWS_ACCESS_KEY_ID,
           awsSecretAccessKey: c.env.AWS_SECRET_ACCESS_KEY,

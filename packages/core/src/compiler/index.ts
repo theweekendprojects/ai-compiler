@@ -117,7 +117,7 @@ function getModel(opts: CompilerOptions) {
       baseURL: `https://api.cloudflare.com/client/v4/accounts/${binding.accountId}/ai/v1`,
       apiKey: binding.apiToken,
     });
-    return cfOpenAI(model ?? '@cf/meta/llama-3.1-8b-instruct');
+    return cfOpenAI(model ?? '@cf/meta/llama-3.3-70b-instruct-fp8-fast');
   }
 
   if (provider === 'anthropic') {
@@ -146,18 +146,49 @@ export async function compile(
   sourceText: string,
   opts: CompilerOptions = {}
 ): Promise<AiopFile> {
-  const model  = getModel(opts);
   const prompt = buildCompilationPrompt(workflow, opts.context);
   const hash   = createHash('sha256').update(sourceText).digest('hex').slice(0, 16);
+  const provider = opts.provider?.provider ?? 'workers-ai';
 
-  const { text } = await generateText({
-    model,
-    prompt,
-    maxOutputTokens: 8192,
-    experimental_telemetry: { isEnabled: false },
-  });
+  let text: string;
 
-  // strip any accidental markdown fences Claude might add
+  if (provider === 'workers-ai') {
+    // Call CF Workers AI REST API directly — avoids AI SDK compat issues
+    const binding = opts.workersAiBinding as { accountId: string; apiToken: string };
+    const model   = opts.provider?.model ?? '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
+    const res = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${binding.accountId}/ai/run/${model}`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${binding.apiToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ messages: [{ role: 'user', content: prompt }], max_tokens: 8192 }),
+      }
+    );
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Workers AI error ${res.status}: ${err}`);
+    }
+    const data = await res.json() as any;
+    // CF REST API returns: result.response (string) or result.choices[0].message.content
+    const raw = data?.result?.response ?? data?.result?.choices?.[0]?.message?.content ?? data?.response ?? '';
+    text = typeof raw === 'string' ? raw : JSON.stringify(raw);
+    if (!text) throw new Error(`Workers AI returned empty response: ${JSON.stringify(data).slice(0, 200)}`);
+  } else {
+    // Anthropic / Bedrock via Vercel AI SDK
+    const model = getModel(opts);
+    const result = await generateText({
+      model,
+      messages: [{ role: 'user', content: prompt }],
+      maxOutputTokens: 8192,
+      experimental_telemetry: { isEnabled: false },
+    });
+    text = result.text;
+  }
+
+  // strip any accidental markdown fences
   const cleaned = text
     .replace(/^```json\s*/m, '')
     .replace(/^```\s*/m, '')
@@ -168,12 +199,11 @@ export async function compile(
   try {
     aiop = JSON.parse(cleaned) as AiopFile;
   } catch {
-    throw new Error(`Compiler returned invalid JSON.\n\nRaw output:\n${text}`);
+    throw new Error(`Compiler returned invalid JSON.\n\nRaw output:\n${text.slice(0, 500)}`);
   }
 
-  // stamp source hash (compiler sets this, not the LLM)
-  aiop.source_hash    = hash;
-  aiop.compiled_at    = new Date().toISOString();
+  aiop.source_hash      = hash;
+  aiop.compiled_at      = new Date().toISOString();
   aiop.compiler_version = COMPILER_VERSION;
 
   return aiop;

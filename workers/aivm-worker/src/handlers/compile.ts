@@ -37,7 +37,7 @@ export async function compileHandler(c: Context<{ Bindings: Env }>) {
       provider: {
         provider: body.provider,
         model: body.model ?? (body.provider === 'workers-ai'
-          ? '@cf/meta/llama-3.1-8b-instruct'
+          ? '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
           : 'claude-opus-4-5'),
       },
       context: body.context,

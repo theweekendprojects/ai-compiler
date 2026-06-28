@@ -177,7 +177,7 @@ export class AiVM {
         baseURL: `https://api.cloudflare.com/client/v4/accounts/${binding.accountId}/ai/v1`,
         apiKey: binding.apiToken,
       });
-      return cfOpenAI(p.model ?? '@cf/meta/llama-3.1-8b-instruct');
+      return cfOpenAI(p.model ?? '@cf/meta/llama-3.3-70b-instruct-fp8-fast');
     }
 
     if (p.provider === 'anthropic') {
@@ -240,12 +240,34 @@ export class AiVM {
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
-        const { text } = await generateText({
-          model: this.getModel(),
-          prompt: buildStepPrompt(aiop, step, resolvedInputs, state),
-          maxOutputTokens: 2048,
-          experimental_telemetry: { isEnabled: false },
-        });
+        let text: string;
+
+        if (this.config.provider?.provider === 'workers-ai') {
+          // Direct REST call — bypasses AI SDK compat issues
+          const binding = this.config.workersAiBinding as { accountId: string; apiToken: string };
+          const model   = this.config.provider.model ?? '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
+          const res = await fetch(
+            `https://api.cloudflare.com/client/v4/accounts/${binding.accountId}/ai/run/${model}`,
+            {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${binding.apiToken}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ messages: [{ role: 'user', content: buildStepPrompt(aiop, step, resolvedInputs, state) }], max_tokens: 2048 }),
+            }
+          );
+          if (!res.ok) throw new Error(`Workers AI ${res.status}: ${await res.text()}`);
+          const data = await res.json() as any;
+          const raw = data?.result?.response ?? data?.result?.choices?.[0]?.message?.content ?? data?.response ?? '';
+          text = typeof raw === 'string' ? raw : JSON.stringify(raw);
+          if (!text) throw new Error(`Workers AI empty response`);
+        } else {
+          const result = await generateText({
+            model: this.getModel(),
+            messages: [{ role: 'user', content: buildStepPrompt(aiop, step, resolvedInputs, state) }],
+            maxOutputTokens: 2048,
+            experimental_telemetry: { isEnabled: false },
+          });
+          text = result.text;
+        }
 
         const cleaned = text
           .replace(/^```json\s*/m, '').replace(/^```\s*/m, '').replace(/```\s*$/m, '').trim();
