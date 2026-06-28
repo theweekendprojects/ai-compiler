@@ -180,18 +180,18 @@ import "../styles/global.css";
   <section id="features" class="relative z-10 px-6 py-16">
     <div class="max-w-5xl mx-auto">
       <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-black mb-3">Built for <span class="gradient-text">everyone</span></h2>
-        <p class="text-[var(--color-muted)]">Whether you're a developer or have never written a line of code.</p>
+        <h2 class="text-3xl md:text-4xl font-black mb-3">Why developers care</h2>
+        <p class="text-[var(--color-muted)]">The framework era is ending. This is what comes next.</p>
       </div>
 
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
         {[
-          { icon: "🧠", title: "Intent-first", desc: "Write what you want, not how to do it. The AI figures out the implementation." },
-          { icon: "🔀", title: "Any AI model", desc: "Claude, Nova Micro, Gemini — swap models with one flag. All routed through Cloudflare AI Gateway." },
-          { icon: "🔒", title: "Deterministic builds", desc: ".aix lock files ensure the same source always compiles to the same bytecode. Reproducible like javac." },
-          { icon: "⚡", title: "Two-step pipeline", desc: "Compile once, run anywhere. Enrich bytecode between steps — add policies, tool bindings, provider hints." },
-          { icon: "🌐", title: "CLI + Web", desc: "Use the CLI locally or run programs live in the browser at aicompiler.dev — no install needed." },
-          { icon: "🛠️", title: "Open source", desc: "MIT licensed. Fork it, extend it, build your own AI languages on top of it." },
+          { icon: "⚙️", title: "LLM is the CPU", desc: "The LLM doesn't assist your code. It IS the runtime. Each opcode is a direct instruction to the model — no Python glue, no chain configuration." },
+          { icon: "🔀", title: "Swap any model", desc: "Claude, Nova Micro, Gemini, Llama — change one flag. All routed through Cloudflare AI Gateway. No rewrite." },
+          { icon: "🔒", title: "Deterministic builds", desc: ".aix lock files ensure the same source always compiles identically. Reproducible like javac. Version-controlled like code." },
+          { icon: "⚡", title: "Enrich between steps", desc: "Two-step pipeline like Java. Between compile and run: inject tool bindings, retry policies, security rules, provider selection per step." },
+          { icon: "🐛", title: "Debuggable by design", desc: "Every step produces a structured execution log. Not a blob of LLM output — named steps, inputs, outputs, durations, error handling." },
+          { icon: "🛠️", title: "Open source, MIT", desc: "Fork it. Build your own AI language on top of it. The .aix opcode format is an open spec." },
         ].map(f => (
           <div class="feature-card">
             <div class="text-2xl mb-3">{f.icon}</div>
@@ -203,67 +203,17 @@ import "../styles/global.css";
     </div>
   </section>
 
-  <!-- Who is it for -->
-  <section class="relative z-10 px-6 py-16">
-    <div class="max-w-5xl mx-auto">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-black mb-3">Who is it <span class="gradient-text">for?</span></h2>
-      </div>
-      <div class="grid md:grid-cols-2 gap-6">
-        {[
-          {
-            audience: "Developers",
-            icon: "👨‍💻",
-            color: "purple",
-            points: [
-              "Replace boilerplate with intent-driven programs",
-              "Swap LLM providers without changing code",
-              "Use the CLI in your existing CI/CD pipeline",
-              "Build AI-powered microservices from .aic files",
-            ],
-          },
-          {
-            audience: "Non-developers",
-            icon: "💡",
-            color: "cyan",
-            points: [
-              "No coding knowledge required",
-              "Write what you want in plain English",
-              "Run it live in the browser — no install",
-              "Describe business logic, let AI handle the rest",
-            ],
-          },
-        ].map(card => (
-          <div class={`glass p-6 border-[var(--color-${card.color === "purple" ? "primary" : "accent"})]`}>
-            <div class="flex items-center gap-3 mb-5">
-              <span class="text-3xl">{card.icon}</span>
-              <h3 class="text-xl font-black">{card.audience}</h3>
-            </div>
-            <ul class="space-y-3">
-              {card.points.map(p => (
-                <li class="flex items-start gap-2 text-[var(--color-muted)] text-sm">
-                  <span class={`mt-0.5 text-${card.color === "purple" ? "[var(--color-primary-glow)]" : "[var(--color-accent)]"}`}>✓</span>
-                  {p}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-
   <!-- CTA -->
   <section class="relative z-10 px-6 py-20 text-center">
     <div class="max-w-2xl mx-auto">
       <h2 class="text-4xl md:text-5xl font-black mb-6">
-        Start writing <span class="gradient-text">intent.</span>
+        The LLM is the CPU.<br /><span class="gradient-text">Try it in 30 seconds.</span>
       </h2>
       <p class="text-[var(--color-muted)] text-lg mb-8">
-        The future of programming isn't more syntax — it's less.
+        No install. No account. No API key. Just open the playground and run.
       </p>
       <div class="flex flex-wrap justify-center gap-4">
-        <a href="#demo" class="btn-primary text-base px-8 py-3">▶ Try the demo</a>
+        <a href="#demo" class="btn-primary text-base px-8 py-3">▶ Open the playground</a>
         <a href="https://github.com/theweekendprojects/ai-compiler" target="_blank" class="btn-ghost text-base px-8 py-3">Star on GitHub ★</a>
       </div>
     </div>
