@@ -431,7 +431,7 @@ export function LiveDemo() {
               workflow.aix
             </button>
           </div>
-          <div className="flex-1 overflow-auto p-3">
+          <div className="flex-1 overflow-auto overflow-x-hidden p-3">
             {!aix && workflowStatus !== 'compiling' && (
               <div className="h-full flex flex-col items-center justify-center gap-3 text-[var(--color-muted)]">
                 <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -449,7 +449,7 @@ export function LiveDemo() {
               </div>
             )}
             {aix && (
-              <pre className="text-xs font-mono text-[var(--color-accent)] leading-relaxed overflow-auto whitespace-pre-wrap">
+              <pre className="text-xs font-mono text-[var(--color-accent)] leading-relaxed overflow-auto whitespace-pre-wrap break-words">
                 {JSON.stringify(aix, null, 2)}
               </pre>
             )}
@@ -488,7 +488,7 @@ export function LiveDemo() {
             {steps.map(step => (
               <div
                 key={step.id}
-                className={`rounded-lg border p-3 transition-all duration-300 ${STATUS_BG[step.status]}`}
+                className={`rounded-lg border p-3 transition-all duration-300 overflow-hidden ${STATUS_BG[step.status]}`}
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
@@ -515,7 +515,7 @@ export function LiveDemo() {
 
                 {/* step output */}
                 {step.output && Object.keys(step.output).length > 0 && (
-                  <pre className="mt-2 text-xs font-mono text-[var(--color-accent-2)] bg-black/20 rounded p-2 overflow-auto max-h-32">
+                  <pre className="mt-2 text-xs font-mono text-[var(--color-accent-2)] bg-black/20 rounded p-2 overflow-hidden max-h-32 whitespace-pre-wrap break-words w-full">
                     {JSON.stringify(step.output, null, 2)}
                   </pre>
                 )}
