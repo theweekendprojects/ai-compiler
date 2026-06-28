@@ -1,27 +1,27 @@
-module UserService
-version 1.0
+# Workflow: UserService
 
-context:
-  A REST API for managing users in a PostgreSQL database.
+## Description
+A REST API workflow for managing users in a PostgreSQL database.
 
-tools: [database, http]
+## Inputs
+- minAge: minimum age threshold for filtering users (default 18)
+- email: email address to search for a specific user
 
-intent getAdultUsers:
-  Get all users from the database where age is above 18.
-  Return as a list sorted by name ascending.
+## Tools
+- database: PostgreSQL — users table with fields id, name, email, age
 
-  input:
-    - none
+## Steps
 
-  output:
-    - array of user objects with fields: id, name, email, age
+### 1. GetAdultUsers
+Get all users from the database where age is above {minAge}.
+Return them sorted by name ascending.
 
-intent findByEmail:
-  Find a single user by their email address.
-  Return null if not found.
+### 2. FindByEmail
+Find a single user by their {email} address.
+Return null if not found.
+Fail with "User not found" if no matching record exists.
 
-  input:
-    - email: the email address to search for
-
-  output:
-    - user object or null
+### 3. FormatResponse
+Format the results from {GetAdultUsers.users} and {FindByEmail.user}
+into a clean API response object.
+Include a count of adult users and the found user details.

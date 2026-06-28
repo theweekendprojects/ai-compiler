@@ -1,17 +1,22 @@
-module HelloWorld
-version 1.0
+# Workflow: HelloWorld
 
-context:
-  A simple hello world example to demonstrate the AI compiler.
+## Description
+A simple hello world demonstration of the aiCompiler language.
 
-tools: [console]
+## Inputs
+- name: the name to greet (optional, defaults to "World")
 
-intent sayHello:
-  Say hello to the world in a creative and inspiring way.
-  Include a motivational quote about programming and the future of AI.
+## Tools
+- console: standard output
 
-  input:
-    - none
+## Steps
 
-  output:
-    - a greeting message with a motivational quote
+### 1. GenerateGreeting
+Say hello to {name} in a creative and inspiring way.
+Include a short motivational quote about the future of
+intent-driven programming and AI as the CPU.
+
+### 2. PrintOutput
+Print the greeting and quote to the console.
+Format it beautifully with a border.
+If console fails, log the error but do not halt.

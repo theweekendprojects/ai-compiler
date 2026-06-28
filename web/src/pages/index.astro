@@ -61,7 +61,7 @@ import "../styles/global.css";
           <span class="pipeline-arrow">→</span>
           <span class="pipeline-step compile">aicompiler compile</span>
           <span class="pipeline-arrow">→</span>
-          <span class="pipeline-step compile">.aibc</span>
+          <span class="pipeline-step compile">.aiop</span>
           <span class="pipeline-arrow">→</span>
           <span class="pipeline-step run">aivm run</span>
           <span class="pipeline-arrow">→</span>
@@ -122,10 +122,10 @@ import "../styles/global.css";
           {
             step: "02",
             icon: "⚡",
-            title: "Compile to .aibc",
+            title: "Compile to .aiop",
             desc: "The AI Compiler parses your spec and produces bytecode — a structured JSON artifact enriched with tool bindings, model selection, and cache hints.",
             badge: "compile",
-            code: `aicompiler compile app.aic\n→ app.aibc ✓`,
+            code: `aicompiler compile app.aic\n→ app.aiop ✓`,
           },
           {
             step: "03",
@@ -133,7 +133,7 @@ import "../styles/global.css";
             title: "Run with aivm",
             desc: "The AI VM reads the bytecode and executes each intent via the language model of your choice — Claude, Nova Micro, Gemini, and more.",
             badge: "run",
-            code: `aivm run app.aibc\n→ Hello, World! ✓`,
+            code: `aivm run app.aiop\n→ Hello, World! ✓`,
           },
         ].map(item => (
           <div class="feature-card relative overflow-hidden">
@@ -165,7 +165,7 @@ import "../styles/global.css";
         {[
           { icon: "🧠", title: "Intent-first", desc: "Write what you want, not how to do it. The AI figures out the implementation." },
           { icon: "🔀", title: "Any AI model", desc: "Claude, Nova Micro, Gemini — swap models with one flag. All routed through Cloudflare AI Gateway." },
-          { icon: "🔒", title: "Deterministic builds", desc: ".aibc lock files ensure the same spec always produces the same bytecode. Reproducible like javac." },
+          { icon: "🔒", title: "Deterministic builds", desc: ".aiop lock files ensure the same spec always produces the same bytecode. Reproducible like javac." },
           { icon: "⚡", title: "Two-step pipeline", desc: "Compile once, run anywhere. Enrich bytecode between steps — add policies, tool bindings, provider hints." },
           { icon: "🌐", title: "CLI + Web", desc: "Use the CLI locally or run specs live in the browser at aicompiler.dev — no install needed." },
           { icon: "🛠️", title: "Open source", desc: "MIT licensed. Fork it, extend it, build your own AI languages on top of it." },

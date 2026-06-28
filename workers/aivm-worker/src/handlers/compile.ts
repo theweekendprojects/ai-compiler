@@ -4,10 +4,10 @@ import { z } from 'zod';
 import type { Env } from '../types.js';
 
 const schema = z.object({
-  source: z.string().min(1),
+  source: z.string().min(1, 'source is required'),
   provider: z.enum(['anthropic', 'bedrock']).optional().default('anthropic'),
   model: z.string().optional(),
-  enableCaching: z.boolean().optional().default(true),
+  context: z.string().optional(), // content of context.md
 });
 
 export async function compileHandler(c: Context<{ Bindings: Env }>) {
@@ -15,25 +15,38 @@ export async function compileHandler(c: Context<{ Bindings: Env }>) {
   try {
     body = schema.parse(await c.req.json());
   } catch (err: any) {
-    return c.json({ error: 'Invalid request', details: err.message }, 400);
+    return c.json({ error: 'Invalid request', details: err.issues ?? err.message }, 400);
   }
 
   try {
-    const spec = parseAic(body.source);
+    const workflow = parseAic(body.source);
 
-    if (!spec.module) {
-      return c.json({ error: 'Missing module declaration. Add: module <YourModuleName>' }, 400);
+    if (!workflow.name) {
+      return c.json({
+        error: 'Missing workflow name. Add: # Workflow: <YourWorkflowName>',
+      }, 400);
     }
 
-    const bytecode = compile(spec, body.source, {
+    if (!workflow.steps.length) {
+      return c.json({
+        error: 'No steps found. Add a ## Steps section with ### 1. StepName blocks.',
+      }, 400);
+    }
+
+    const aiop = await compile(workflow, body.source, {
       provider: {
         provider: body.provider,
-        model: body.model ?? (body.provider === 'bedrock' ? 'us.amazon.nova-micro-v1:0' : 'claude-opus-4-5'),
+        model: body.model ?? 'claude-opus-4-5',
       },
-      enableCaching: body.enableCaching,
+      context: body.context,
+      anthropicApiKey: c.env.ANTHROPIC_API_KEY,
+      awsAccessKeyId: c.env.AWS_ACCESS_KEY_ID,
+      awsSecretAccessKey: c.env.AWS_SECRET_ACCESS_KEY,
+      awsRegion: c.env.AWS_REGION,
+      cfGatewayUrl: c.env.CF_GATEWAY_URL,
     });
 
-    return c.json(bytecode);
+    return c.json(aiop);
   } catch (err: any) {
     return c.json({ error: 'Compilation failed', details: err.message }, 500);
   }

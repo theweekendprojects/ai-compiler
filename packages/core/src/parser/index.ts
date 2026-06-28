@@ -1,40 +1,45 @@
 /**
- * .aic source file parser
+ * .aic language parser
  *
- * .aic syntax:
+ * Parses the Markdown-based .aic workflow format into a structured AicWorkflow.
  *
- *   module UserService
- *   version 1.0
+ * Expected format:
  *
- *   context:
- *     REST API for managing users in PostgreSQL
+ *   # Workflow: <Name>
  *
- *   tools: [database, http]
+ *   ## Description
+ *   <paragraph>
  *
- *   intent getAdultUsers:
- *     Get all users where age > 18, sorted by name ascending.
+ *   ## Inputs
+ *   - inputName: description
  *
- *     input:
- *       - none
+ *   ## Tools
+ *   - toolName: description
  *
- *     output:
- *       - list of user objects (id, name, email, age)
+ *   ## Steps
+ *
+ *   ### 1. <StepName>
+ *   Plain English description.
+ *   Reference inputs as {inputName}.
+ *   Reference previous step outputs as {StepName.field}.
  */
 
-import type { AicSpec, AicIntent } from '../types/index.js';
+import type { AicWorkflow, AicStep } from '../types/index.js';
 
-export function parseAic(source: string): AicSpec {
+export function parseAic(source: string): AicWorkflow {
   const lines = source.split('\n');
-  const spec: AicSpec = {
-    module: '',
-    version: '1.0',
-    context: '',
-    tools: [],
-    intents: [],
+
+  const workflow: AicWorkflow = {
+    name: '',
+    description: '',
+    inputs: {},
+    tools: {},
+    steps: [],
   };
 
-  let current: AicIntent | null = null;
-  let section: 'none' | 'context' | 'intent-body' | 'input' | 'output' = 'none';
+  type Section = 'none' | 'description' | 'inputs' | 'tools' | 'steps';
+  let section: Section = 'none';
+  let currentStep: AicStep | null = null;
   let buffer: string[] = [];
 
   const flushBuffer = () => {
@@ -43,97 +48,85 @@ export function parseAic(source: string): AicSpec {
     return text;
   };
 
+  const saveCurrentStep = () => {
+    if (currentStep) {
+      currentStep.description = flushBuffer();
+      workflow.steps.push(currentStep);
+      currentStep = null;
+    }
+  };
+
   for (const raw of lines) {
     const line = raw.trimEnd();
     const trimmed = line.trim();
 
-    // module declaration
-    if (/^module\s+(.+)/i.test(trimmed)) {
-      spec.module = trimmed.replace(/^module\s+/i, '').trim();
+    // H1 — workflow name
+    if (/^# Workflow:\s*(.+)/i.test(trimmed)) {
+      workflow.name = trimmed.replace(/^# Workflow:\s*/i, '').trim();
       continue;
     }
 
-    // version declaration
-    if (/^version\s+(.+)/i.test(trimmed)) {
-      spec.version = trimmed.replace(/^version\s+/i, '').trim();
+    // H2 — top-level sections
+    if (/^## Description/i.test(trimmed)) {
+      saveCurrentStep();
+      section = 'description';
+      buffer = [];
+      continue;
+    }
+    if (/^## Inputs/i.test(trimmed)) {
+      if (section === 'description') workflow.description = flushBuffer();
+      saveCurrentStep();
+      section = 'inputs';
+      continue;
+    }
+    if (/^## Tools/i.test(trimmed)) {
+      saveCurrentStep();
+      section = 'tools';
+      continue;
+    }
+    if (/^## Steps/i.test(trimmed)) {
+      saveCurrentStep();
+      section = 'steps';
       continue;
     }
 
-    // context block
-    if (/^context\s*:/i.test(trimmed)) {
-      section = 'context';
-      continue;
-    }
-
-    // tools: [a, b, c]
-    if (/^tools\s*:/i.test(trimmed)) {
-      const match = trimmed.match(/\[(.+)\]/);
-      if (match) {
-        spec.tools = match[1].split(',').map(t => t.trim()).filter(Boolean);
-      }
-      section = 'none';
-      continue;
-    }
-
-    // intent declaration
-    if (/^intent\s+(\w+)\s*:/i.test(trimmed)) {
-      if (current) {
-        if (section === 'intent-body') current.description = flushBuffer();
-        spec.intents.push(current);
-      }
-      current = {
-        name: trimmed.replace(/^intent\s+/i, '').replace(/:$/, '').trim(),
-        description: '',
-        input: [],
-        output: [],
-      };
-      section = 'intent-body';
+    // H3 — individual step inside ## Steps
+    if (section === 'steps' && /^### \d+\.\s+(.+)/.test(trimmed)) {
+      saveCurrentStep();
+      const name = trimmed.replace(/^### \d+\.\s+/, '').trim();
+      currentStep = { name, description: '' };
       buffer = [];
       continue;
     }
 
-    // input / output sub-sections inside intent
-    if (current && /^input\s*:/i.test(trimmed)) {
-      if (section === 'intent-body') current.description = flushBuffer();
-      section = 'input';
-      continue;
-    }
-    if (current && /^output\s*:/i.test(trimmed)) {
-      if (section === 'intent-body') current.description = flushBuffer();
-      section = 'output';
-      continue;
-    }
-
-    // list items
+    // List items — inputs and tools
     if (/^-\s+(.+)/.test(trimmed)) {
       const item = trimmed.replace(/^-\s+/, '').trim();
-      if (section === 'input' && current) { current.input.push(item); continue; }
-      if (section === 'output' && current) { current.output.push(item); continue; }
+      const colonIdx = item.indexOf(':');
+      if (colonIdx > -1) {
+        const key = item.slice(0, colonIdx).trim();
+        const val = item.slice(colonIdx + 1).trim();
+        if (section === 'inputs') { workflow.inputs[key] = val; continue; }
+        if (section === 'tools')  { workflow.tools[key] = val; continue; }
+      }
     }
 
-    // context body text
-    if (section === 'context' && trimmed) {
+    // Body text
+    if (section === 'description' && trimmed) {
       buffer.push(trimmed);
       continue;
     }
-
-    // intent body text
-    if (section === 'intent-body' && current) {
+    if (section === 'steps' && currentStep && trimmed) {
       buffer.push(line);
       continue;
     }
   }
 
-  // flush last context
-  if (section === 'context') {
-    spec.context = buffer.join(' ').trim();
+  // flush last step / description
+  saveCurrentStep();
+  if (section === 'description' && buffer.length) {
+    workflow.description = flushBuffer();
   }
 
-  // flush last intent
-  if (current) {
-    if (section === 'intent-body') current.description = flushBuffer();
-    spec.intents.push(current);
-  }
-
-  return spec;
+  return workflow;
 }
