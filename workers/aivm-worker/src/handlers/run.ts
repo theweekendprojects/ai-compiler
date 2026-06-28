@@ -1,11 +1,11 @@
 import type { Context } from 'hono';
 import { AiVM } from '@ai-compiler/core';
-import type { AiopFile, StepExecutionResult } from '@ai-compiler/core';
+import type { AixFile, StepExecutionResult } from '@ai-compiler/core';
 import { z } from 'zod';
 import type { Env } from '../types.js';
 
 const schema = z.object({
-  aiop: z.record(z.any()),
+  aix: z.record(z.any()),
   inputs: z.record(z.string()).optional().default({}),
   provider: z.enum(['anthropic', 'bedrock', 'workers-ai']).optional(),
   model: z.string().optional(),
@@ -20,9 +20,9 @@ export async function runHandler(c: Context<{ Bindings: Env }>) {
     return c.json({ error: 'Invalid request', details: err.issues ?? err.message }, 400);
   }
 
-  const aiop = body.aiop as AiopFile;
-  const provider = body.provider ?? aiop.steps[0]?.provider ?? 'anthropic';
-  const model    = body.model    ?? aiop.steps[0]?.model;
+  const aix = body.aix as AixFile;
+  const provider = body.provider ?? aix.steps[0]?.provider ?? 'anthropic';
+  const model    = body.model    ?? aix.steps[0]?.model;
 
   const vm = new AiVM({
     provider: { provider: provider as any, model: model ?? '@cf/meta/llama-3.3-70b-instruct-fp8-fast' },
@@ -36,7 +36,7 @@ export async function runHandler(c: Context<{ Bindings: Env }>) {
   });
 
   try {
-    const result = await vm.run(aiop, body.inputs);
+    const result = await vm.run(aix, body.inputs);
     return c.json(result);
   } catch (err: any) {
     return c.json({ error: 'Execution failed', details: err.message }, 500);

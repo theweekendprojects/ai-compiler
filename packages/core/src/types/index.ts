@@ -13,9 +13,9 @@ export interface AicWorkflow {
   steps: AicStep[];
 }
 
-// ─── .aiop opcode types ────────────────────────────────────────────────────────
+// ─── .aix opcode types ────────────────────────────────────────────────────────
 
-export type AiopAction =
+export type AixAction =
   | 'READ'
   | 'WRITE'
   | 'UPDATE'
@@ -27,31 +27,31 @@ export type AiopAction =
 
 export type OnFailAction = 'HALT' | 'LOG' | 'RETRY' | 'SKIP';
 
-export interface AiopCheck {
+export interface AixCheck {
   condition: string;
   on_fail: string; // human-readable failure message
 }
 
-export interface AiopOnFail {
+export interface AixOnFail {
   condition?: string;
   message?: string;
   action: OnFailAction;
 }
 
-export interface AiopStep {
+export interface AixStep {
   id: string;                          // step_1, step_2 …
   name: string;                        // PascalCase from .aic heading
   intent: string;                      // zero-ambiguity rewrite by compiler
   tool: string | null;                 // tool name or null
-  action: AiopAction;
+  action: AixAction;
   inputs: Record<string, string>;      // field → $input.x or $step_N.field or literal
-  checks?: AiopCheck[];                // VALIDATE steps only
+  checks?: AixCheck[];                // VALIDATE steps only
   outputs: Record<string, string>;     // field → description of what is stored
-  on_fail: AiopOnFail;
+  on_fail: AixOnFail;
   compiler_note?: string;              // assumption compiler made
 }
 
-export interface AiopFile {
+export interface AixFile {
   workflow: string;
   version: '1.0';
   compiled_at: string;                 // ISO 8601
@@ -59,7 +59,7 @@ export interface AiopFile {
   source_hash: string;                 // sha256 of .aic source
   inputs: Record<string, string>;
   tools: Record<string, string>;
-  steps: AiopStep[];
+  steps: AixStep[];
 }
 
 // ─── aiVM execution types ──────────────────────────────────────────────────────
@@ -101,5 +101,5 @@ export interface ProviderConfig {
 export interface LockFile {
   compiled_at: string;
   source_hash: string;
-  aiop: AiopFile;
+  aix: AixFile;
 }

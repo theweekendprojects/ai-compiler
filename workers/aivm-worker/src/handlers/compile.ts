@@ -33,7 +33,7 @@ export async function compileHandler(c: Context<{ Bindings: Env }>) {
       }, 400);
     }
 
-    const aiop = await compile(workflow, body.source, {
+    const aix = await compile(workflow, body.source, {
       provider: {
         provider: body.provider,
         model: body.model ?? (body.provider === 'workers-ai'
@@ -49,7 +49,7 @@ export async function compileHandler(c: Context<{ Bindings: Env }>) {
       cfGatewayUrl:       c.env.CF_GATEWAY_URL,
     });
 
-    return c.json(aiop);
+    return c.json(aix);
   } catch (err: any) {
     return c.json({ error: 'Compilation failed', details: err.message }, 500);
   }

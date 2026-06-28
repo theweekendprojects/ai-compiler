@@ -44,8 +44,8 @@ import "../styles/global.css";
     </h1>
 
     <p class="text-lg md:text-xl text-[var(--color-muted)] max-w-2xl mx-auto mb-10 leading-relaxed">
-      AI Compiler lets anyone describe <em>what</em> they want in plain English.<br class="hidden md:block" />
-      It compiles to bytecode. The AI VM executes it. No syntax. No boilerplate.
+      AI Compiler is a programming language where you write <em>what</em> to do, not how.<br class="hidden md:block" />
+      It compiles to bytecode. The AI VM executes it. Minimal syntax. Zero boilerplate.
     </p>
 
     <div class="flex flex-wrap items-center justify-center gap-4 mb-12">
@@ -61,7 +61,7 @@ import "../styles/global.css";
           <span class="pipeline-arrow">→</span>
           <span class="pipeline-step compile">aicompiler compile</span>
           <span class="pipeline-arrow">→</span>
-          <span class="pipeline-step compile">.aiop</span>
+          <span class="pipeline-step compile">.aix</span>
           <span class="pipeline-arrow">→</span>
           <span class="pipeline-step run">aivm run</span>
           <span class="pipeline-arrow">→</span>
@@ -115,17 +115,17 @@ import "../styles/global.css";
             step: "01",
             icon: "✍️",
             title: "Write a .aic file",
-            desc: "Describe what you want in plain English inside a simple spec file. No semicolons. No type annotations. Just intent.",
+            desc: "Write your program in plain English — workflows, steps, tools. No semicolons. No type annotations. No boilerplate. Just what you want to happen.",
             badge: "source",
             code: `module Greeter\n\nintent sayHello:\n  Say hello creatively.`,
           },
           {
             step: "02",
             icon: "⚡",
-            title: "Compile to .aiop",
-            desc: "The AI Compiler parses your spec and produces bytecode — a structured JSON artifact enriched with tool bindings, model selection, and cache hints.",
+            title: "Compile to .aix",
+            desc: "The AI Compiler parses your source file and produces bytecode — a structured JSON artifact enriched with tool bindings, model selection, and cache hints.",
             badge: "compile",
-            code: `aicompiler compile app.aic\n→ app.aiop ✓`,
+            code: `aicompiler compile app.aic\n→ app.aix ✓`,
           },
           {
             step: "03",
@@ -133,7 +133,7 @@ import "../styles/global.css";
             title: "Run with aivm",
             desc: "The AI VM reads the bytecode and executes each intent via the language model of your choice — Claude, Nova Micro, Gemini, and more.",
             badge: "run",
-            code: `aivm run app.aiop\n→ Hello, World! ✓`,
+            code: `aivm run app.aix\n→ Hello, World! ✓`,
           },
         ].map(item => (
           <div class="feature-card relative overflow-hidden">
@@ -165,9 +165,9 @@ import "../styles/global.css";
         {[
           { icon: "🧠", title: "Intent-first", desc: "Write what you want, not how to do it. The AI figures out the implementation." },
           { icon: "🔀", title: "Any AI model", desc: "Claude, Nova Micro, Gemini — swap models with one flag. All routed through Cloudflare AI Gateway." },
-          { icon: "🔒", title: "Deterministic builds", desc: ".aiop lock files ensure the same spec always produces the same bytecode. Reproducible like javac." },
+          { icon: "🔒", title: "Deterministic builds", desc: ".aix lock files ensure the same source always compiles to the same bytecode. Reproducible like javac." },
           { icon: "⚡", title: "Two-step pipeline", desc: "Compile once, run anywhere. Enrich bytecode between steps — add policies, tool bindings, provider hints." },
-          { icon: "🌐", title: "CLI + Web", desc: "Use the CLI locally or run specs live in the browser at aicompiler.dev — no install needed." },
+          { icon: "🌐", title: "CLI + Web", desc: "Use the CLI locally or run programs live in the browser at aicompiler.dev — no install needed." },
           { icon: "🛠️", title: "Open source", desc: "MIT licensed. Fork it, extend it, build your own AI languages on top of it." },
         ].map(f => (
           <div class="feature-card">
@@ -193,7 +193,7 @@ import "../styles/global.css";
             icon: "👨‍💻",
             color: "purple",
             points: [
-              "Replace boilerplate with intent-driven specs",
+              "Replace boilerplate with intent-driven programs",
               "Swap LLM providers without changing code",
               "Use the CLI in your existing CI/CD pipeline",
               "Build AI-powered microservices from .aic files",

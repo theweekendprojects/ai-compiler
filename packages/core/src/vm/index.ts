@@ -1,7 +1,7 @@
 /**
  * aiVM — AI Virtual Machine
  *
- * Executes .aiop bytecode step by step.
+ * Executes .aix bytecode step by step.
  * The LLM is the CPU — it executes each opcode via Vercel AI SDK.
  *
  * Reuses:   Vercel AI SDK generateText (LLM calls per step)
@@ -12,8 +12,8 @@ import { generateText } from 'ai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createAmazonBedrock } from '@ai-sdk/amazon-bedrock';
 import type {
-  AiopFile,
-  AiopStep,
+  AixFile,
+  AixStep,
   StepExecutionResult,
   StepStatus,
   WorkflowExecutionResult,
@@ -70,8 +70,8 @@ function resolveStepInputs(
 // ─── Step execution prompt ────────────────────────────────────────────────────
 
 function buildStepPrompt(
-  aiop: AiopFile,
-  step: AiopStep,
+  aix: AixFile,
+  step: AixStep,
   resolvedInputs: Record<string, string>,
   state: ExecutionState
 ): string {
@@ -80,7 +80,7 @@ function buildStepPrompt(
     .join('\n');
 
   const toolDesc = step.tool
-    ? `Tool: ${step.tool} — ${aiop.tools[step.tool] ?? 'no description'}`
+    ? `Tool: ${step.tool} — ${aix.tools[step.tool] ?? 'no description'}`
     : 'Tool: none required';
 
   const checks = step.checks?.length
@@ -93,7 +93,7 @@ function buildStepPrompt(
 
   return `You are aiVM executing one step of a workflow. Execute exactly what the step says.
 
-Workflow: ${aiop.workflow}
+Workflow: ${aix.workflow}
 Step ${step.id}: ${step.name}
 Intent: ${step.intent}
 Action: ${step.action}
@@ -127,7 +127,7 @@ If the step fails based on its on_fail condition, return:
 // ─── Simulation ───────────────────────────────────────────────────────────────
 // Generates realistic mock output for each step without a real LLM call
 
-function simulateStep(step: AiopStep, resolvedInputs: Record<string, string>): Record<string, unknown> {
+function simulateStep(step: AixStep, resolvedInputs: Record<string, string>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [field, desc] of Object.entries(step.outputs)) {
     const low = desc.toLowerCase();
@@ -207,8 +207,8 @@ export class AiVM {
    * state is mutated in place so subsequent steps can reference earlier outputs.
    */
   async runStep(
-    aiop: AiopFile,
-    step: AiopStep,
+    aix: AixFile,
+    step: AixStep,
     inputs: Record<string, string>,
     priorResults: StepExecutionResult[],
     state?: ExecutionState
@@ -251,7 +251,7 @@ export class AiVM {
             {
               method: 'POST',
               headers: { Authorization: `Bearer ${binding.apiToken}`, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ messages: [{ role: 'user', content: buildStepPrompt(aiop, step, resolvedInputs, state) }], max_tokens: 2048 }),
+              body: JSON.stringify({ messages: [{ role: 'user', content: buildStepPrompt(aix, step, resolvedInputs, state) }], max_tokens: 2048 }),
             }
           );
           if (!res.ok) throw new Error(`Workers AI ${res.status}: ${await res.text()}`);
@@ -262,7 +262,7 @@ export class AiVM {
         } else {
           const result = await generateText({
             model: this.getModel(),
-            messages: [{ role: 'user', content: buildStepPrompt(aiop, step, resolvedInputs, state) }],
+            messages: [{ role: 'user', content: buildStepPrompt(aix, step, resolvedInputs, state) }],
             maxOutputTokens: 2048,
             experimental_telemetry: { isEnabled: false },
           });
@@ -310,7 +310,7 @@ export class AiVM {
    * Stops on FAILED (HALT), continues on LOGGED/SKIPPED.
    */
   async run(
-    aiop: AiopFile,
+    aix: AixFile,
     inputs: Record<string, string> = {}
   ): Promise<WorkflowExecutionResult> {
     const startedAt = new Date().toISOString();
@@ -319,8 +319,8 @@ export class AiVM {
     let workflowStatus: WorkflowExecutionResult['status'] = 'SUCCESS';
     let workflowError: string | undefined;
 
-    for (const step of aiop.steps) {
-      const result = await this.runStep(aiop, step, inputs, stepResults, state);
+    for (const step of aix.steps) {
+      const result = await this.runStep(aix, step, inputs, stepResults, state);
       stepResults.push(result);
 
       if (result.status === 'FAILED') {
@@ -332,7 +332,7 @@ export class AiVM {
     }
 
     return {
-      workflow: aiop.workflow,
+      workflow: aix.workflow,
       started_at: startedAt,
       completed_at: new Date().toISOString(),
       status: workflowStatus,

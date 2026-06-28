@@ -1,8 +1,8 @@
 /**
- * aiCompiler — .aic → .aiop
+ * aiCompiler — .aic → .aix
  *
  * Sends the parsed workflow to Claude with a strict compilation prompt.
- * Claude resolves ALL ambiguity and produces zero-ambiguity .aiop JSON.
+ * Claude resolves ALL ambiguity and produces zero-ambiguity .aix JSON.
  * The LLM is the compiler — not a helper.
  */
 
@@ -10,7 +10,7 @@ import { createHash } from 'crypto';
 import { generateText } from 'ai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createAmazonBedrock } from '@ai-sdk/amazon-bedrock';
-import type { AicWorkflow, AiopFile, LockFile, ProviderConfig } from '../types/index.js';
+import type { AicWorkflow, AixFile, LockFile, ProviderConfig } from '../types/index.js';
 
 const COMPILER_VERSION = '0.1.0';
 
@@ -21,7 +21,7 @@ function buildCompilationPrompt(workflow: AicWorkflow, context?: string): string
     ? `\n\nProject context (use this to resolve ambiguities):\n${context}`
     : '';
 
-  return `You are aiCompiler. Convert the .aic workflow below into a precise .aiop JSON execution file.
+  return `You are aiCompiler. Convert the .aic workflow below into a precise .aix JSON execution file.
 
 RULES:
 - Every step must have: id (step_1, step_2...), name, intent, tool, action, inputs, outputs, on_fail
@@ -145,7 +145,7 @@ export async function compile(
   workflow: AicWorkflow,
   sourceText: string,
   opts: CompilerOptions = {}
-): Promise<AiopFile> {
+): Promise<AixFile> {
   const prompt = buildCompilationPrompt(workflow, opts.context);
   const hash   = createHash('sha256').update(sourceText).digest('hex').slice(0, 16);
   const provider = opts.provider?.provider ?? 'workers-ai';
@@ -195,27 +195,27 @@ export async function compile(
     .replace(/```\s*$/m, '')
     .trim();
 
-  let aiop: AiopFile;
+  let aix: AixFile;
   try {
-    aiop = JSON.parse(cleaned) as AiopFile;
+    aix = JSON.parse(cleaned) as AixFile;
   } catch {
     throw new Error(`Compiler returned invalid JSON.\n\nRaw output:\n${text.slice(0, 500)}`);
   }
 
-  aiop.source_hash      = hash;
-  aiop.compiled_at      = new Date().toISOString();
-  aiop.compiler_version = COMPILER_VERSION;
+  aix.source_hash      = hash;
+  aix.compiled_at      = new Date().toISOString();
+  aix.compiler_version = COMPILER_VERSION;
 
-  return aiop;
+  return aix;
 }
 
 // ─── Lock file helpers ────────────────────────────────────────────────────────
 
-export function buildLockFile(sourceText: string, aiop: AiopFile): LockFile {
+export function buildLockFile(sourceText: string, aix: AixFile): LockFile {
   return {
     compiled_at: new Date().toISOString(),
-    source_hash: aiop.source_hash,
-    aiop,
+    source_hash: aix.source_hash,
+    aix,
   };
 }
 

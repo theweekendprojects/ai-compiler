@@ -1,11 +1,11 @@
 import type { Context } from 'hono';
 import { parseAic, compile, AiVM } from '@ai-compiler/core';
-import type { AiopFile, StepExecutionResult } from '@ai-compiler/core';
+import type { AixFile, StepExecutionResult } from '@ai-compiler/core';
 import { z } from 'zod';
 import type { Env } from '../types.js';
 
 const schema = z.object({
-  aiop: z.record(z.any()).optional(),
+  aix: z.record(z.any()).optional(),
   source: z.string().optional(),
   inputs: z.record(z.string()).optional().default({}),
   provider: z.enum(['anthropic', 'bedrock', 'workers-ai']).optional().default('workers-ai'),
@@ -23,7 +23,7 @@ const schema = z.object({
  *   { type: 'workflow_done', result: WorkflowExecutionResult }
  *   { type: 'error',         message: string }
  *
- * Accepts either a pre-compiled aiop or raw source (compiles first).
+ * Accepts either a pre-compiled aix or raw source (compiles first).
  */
 export async function streamHandler(c: Context<{ Bindings: Env }>) {
   let body: z.infer<typeof schema>;
@@ -33,8 +33,8 @@ export async function streamHandler(c: Context<{ Bindings: Env }>) {
     return c.json({ error: 'Invalid request', details: err.issues ?? err.message }, 400);
   }
 
-  if (!body.aiop && !body.source) {
-    return c.json({ error: 'Provide either aiop or source' }, 400);
+  if (!body.aix && !body.source) {
+    return c.json({ error: 'Provide either aix or source' }, 400);
   }
 
   const encoder = new TextEncoder();
@@ -47,11 +47,11 @@ export async function streamHandler(c: Context<{ Bindings: Env }>) {
 
       try {
         // ── compile if source provided ──────────────────────────────────────
-        let aiop: AiopFile;
+        let aix: AixFile;
         if (body.source) {
           send({ type: 'compiling' });
           const workflow = parseAic(body.source);
-          aiop = await compile(workflow, body.source, {
+          aix = await compile(workflow, body.source, {
             provider: { provider: body.provider, model: body.model ?? '@cf/meta/llama-3.3-70b-instruct-fp8-fast' },
             context: body.context,
             workersAiBinding:   { accountId: c.env.CF_ACCOUNT_ID, apiToken: c.env.CF_API_TOKEN },
@@ -61,9 +61,9 @@ export async function streamHandler(c: Context<{ Bindings: Env }>) {
             awsRegion:          c.env.AWS_REGION,
             cfGatewayUrl:       c.env.CF_GATEWAY_URL,
           });
-          send({ type: 'compiled', aiop });
+          send({ type: 'compiled', aix });
         } else {
-          aiop = body.aiop as AiopFile;
+          aix = body.aix as AixFile;
         }
 
         // ── run step by step, streaming updates ────────────────────────────
@@ -86,11 +86,11 @@ export async function streamHandler(c: Context<{ Bindings: Env }>) {
         const startedAt = new Date().toISOString();
         const stepResults: StepExecutionResult[] = [];
 
-        for (const step of aiop.steps) {
+        for (const step of aix.steps) {
           send({ type: 'step_start', step: { id: step.id, name: step.name } });
 
           // run single step via vm
-          const stepResult = await (vm as any).runStep(aiop, step, body.inputs, stepResults);
+          const stepResult = await (vm as any).runStep(aix, step, body.inputs, stepResults);
           stepResults.push(stepResult);
 
           send({ type: 'step_done', step: stepResult });
@@ -105,7 +105,7 @@ export async function streamHandler(c: Context<{ Bindings: Env }>) {
         send({
           type: 'workflow_done',
           result: {
-            workflow: aiop.workflow,
+            workflow: aix.workflow,
             started_at: startedAt,
             completed_at: new Date().toISOString(),
             status,

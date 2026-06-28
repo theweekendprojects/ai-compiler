@@ -2,7 +2,7 @@
  * LiveDemo — 3-panel playground
  *
  * Panel 1: Monaco editor (.aic source)
- * Panel 2: .aiop bytecode viewer
+ * Panel 2: .aix bytecode viewer
  * Panel 3: Step-by-step execution log
  *
  * Step status pattern adapted from:
@@ -108,7 +108,7 @@ interface LiveStep {
   simulated?: boolean;
 }
 
-type Panel = 'source' | 'aiop' | 'execution';
+type Panel = 'source' | 'aix' | 'execution';
 type ExampleKey = keyof typeof EXAMPLES;
 
 // ─── Status helpers ───────────────────────────────────────────────────────────
@@ -145,7 +145,7 @@ const STATUS_BG: Record<StepStatus, string> = {
 export function LiveDemo() {
   const [source, setSource] = useState(EXAMPLES.refund);
   const [activePanel, setActivePanel] = useState<Panel>('source');
-  const [aiop, setAiop] = useState<object | null>(null);
+  const [aix, setaix] = useState<object | null>(null);
   const [steps, setSteps] = useState<LiveStep[]>([]);
   const [workflowStatus, setWorkflowStatus] = useState<'idle' | 'compiling' | 'running' | 'success' | 'failed' | 'partial'>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -167,7 +167,7 @@ export function LiveDemo() {
 
   const compileAndRun = useCallback(async () => {
     setError(null);
-    setAiop(null);
+    setaix(null);
     setSteps([]);
     setWorkflowStatus('compiling');
     setActivePanel('execution');
@@ -207,10 +207,10 @@ export function LiveDemo() {
                 break;
 
               case 'compiled':
-                setAiop(event.aiop);
+                setaix(event.aix);
                 setWorkflowStatus('running');
                 // pre-populate all steps as pending — pattern from AgentStep
-                setSteps(event.aiop.steps.map((s: any) => ({
+                setSteps(event.aix.steps.map((s: any) => ({
                   id: s.id, name: s.name, status: 'pending' as StepStatus,
                 })));
                 setActivePanel('execution');
@@ -253,7 +253,7 @@ export function LiveDemo() {
 
   const compileOnly = useCallback(async () => {
     setError(null);
-    setAiop(null);
+    setaix(null);
     setWorkflowStatus('compiling');
 
     try {
@@ -264,8 +264,8 @@ export function LiveDemo() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Compilation failed');
-      setAiop(data);
-      setActivePanel('aiop');
+      setaix(data);
+      setActivePanel('aix');
       setWorkflowStatus('idle');
     } catch (err: any) {
       setError(err.message);
@@ -290,7 +290,7 @@ export function LiveDemo() {
               onClick={() => {
                 setSource(EXAMPLES[key]);
                 setActivePanel('source');
-                setAiop(null);
+                setaix(null);
                 setSteps([]);
                 setError(null);
                 setWorkflowStatus('idle');
@@ -352,19 +352,19 @@ export function LiveDemo() {
           </div>
         </div>
 
-        {/* Panel 2 — .aiop bytecode */}
+        {/* Panel 2 — .aix bytecode */}
         <div className="editor-pane flex flex-col" style={{ height: '480px' }}>
           <div className="editor-tab-bar">
             <span className="dot dot-red" /><span className="dot dot-yellow" /><span className="dot dot-green" />
             <button
-              onClick={() => setActivePanel('aiop')}
-              className={`ml-2 editor-tab ${activePanel === 'aiop' ? 'active' : ''}`}
+              onClick={() => setActivePanel('aix')}
+              className={`ml-2 editor-tab ${activePanel === 'aix' ? 'active' : ''}`}
             >
-              workflow.aiop
+              workflow.aix
             </button>
           </div>
           <div className="flex-1 overflow-auto p-3">
-            {!aiop && workflowStatus !== 'compiling' && (
+            {!aix && workflowStatus !== 'compiling' && (
               <div className="h-full flex flex-col items-center justify-center gap-3 text-[var(--color-muted)]">
                 <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
@@ -380,9 +380,9 @@ export function LiveDemo() {
                 <p className="text-xs">Compiling with Claude...</p>
               </div>
             )}
-            {aiop && (
+            {aix && (
               <pre className="text-xs font-mono text-[var(--color-accent)] leading-relaxed overflow-auto whitespace-pre-wrap">
-                {JSON.stringify(aiop, null, 2)}
+                {JSON.stringify(aix, null, 2)}
               </pre>
             )}
           </div>
@@ -485,7 +485,7 @@ export function LiveDemo() {
         <button onClick={compileOnly} disabled={isBusy} className="btn-ghost">
           {workflowStatus === 'compiling' && !steps.length
             ? <><Spinner /> Compiling...</>
-            : <><CompileIcon /> Compile → .aiop</>
+            : <><CompileIcon /> Compile → .aix</>
           }
         </button>
         <button onClick={compileAndRun} disabled={isBusy} className="btn-primary text-base px-8 py-3">
@@ -503,7 +503,7 @@ export function LiveDemo() {
           <span className="pipeline-arrow">→</span>
           <span className="pipeline-step compile">aicompiler compile</span>
           <span className="pipeline-arrow">→</span>
-          <span className="pipeline-step compile">.aiop</span>
+          <span className="pipeline-step compile">.aix</span>
           <span className="pipeline-arrow">→</span>
           <span className="pipeline-step run">aivm run</span>
           <span className="pipeline-arrow">→</span>

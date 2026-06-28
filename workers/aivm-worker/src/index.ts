@@ -15,13 +15,13 @@ app.use('*', cors({
 
 app.get('/', c => c.json({ name: 'aivm-worker', version: '0.1.0', status: 'ok' }));
 
-// POST /compile  — .aic source → .aiop bytecode
+// POST /compile  — .aic source → .aix bytecode
 app.post('/compile', compileHandler);
 
-// POST /run      — .aiop + inputs → full execution result
+// POST /run      — .aix + inputs → full execution result
 app.post('/run', runHandler);
 
-// POST /stream   — .aic source or .aiop → NDJSON step-by-step execution stream
+// POST /stream   — .aic source or .aix → NDJSON step-by-step execution stream
 app.post('/stream', streamHandler);
 
 export default { fetch: app.fetch };
