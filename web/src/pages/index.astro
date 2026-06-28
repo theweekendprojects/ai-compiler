@@ -1,0 +1,263 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { LiveDemo } from "../components/LiveDemo";
+import "../styles/global.css";
+---
+
+<Layout>
+  <!-- Aurora background -->
+  <div class="aurora">
+    <div class="aurora-blob"></div>
+    <div class="aurora-blob"></div>
+    <div class="aurora-blob"></div>
+  </div>
+  <div class="grid-bg"></div>
+
+  <!-- Nav -->
+  <nav class="relative z-10 flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm">AI</div>
+      <span class="font-bold text-lg tracking-tight">aicompiler<span class="text-[var(--color-muted)]">.dev</span></span>
+    </div>
+    <div class="hidden md:flex items-center gap-6 text-sm text-[var(--color-muted)]">
+      <a href="#demo" class="hover:text-white transition-colors">Demo</a>
+      <a href="#how-it-works" class="hover:text-white transition-colors">How it works</a>
+      <a href="#features" class="hover:text-white transition-colors">Features</a>
+      <a href="https://github.com/theweekendprojects/ai-compiler" target="_blank" class="hover:text-white transition-colors flex items-center gap-1">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        GitHub
+      </a>
+    </div>
+    <a href="#demo" class="btn-primary text-sm px-5 py-2">Try it free →</a>
+  </nav>
+
+  <!-- Hero -->
+  <section class="relative z-10 text-center px-6 pt-16 pb-12 max-w-5xl mx-auto">
+    <div class="inline-flex items-center gap-2 badge badge-purple mb-6">
+      <span class="w-2 h-2 rounded-full bg-violet-400 animate-pulse"></span>
+      The first AI-native programming language
+    </div>
+
+    <h1 class="text-5xl md:text-7xl font-black tracking-tight leading-tight mb-6">
+      Write <span class="gradient-text">intent.</span><br />
+      Not instructions.
+    </h1>
+
+    <p class="text-lg md:text-xl text-[var(--color-muted)] max-w-2xl mx-auto mb-10 leading-relaxed">
+      AI Compiler lets anyone describe <em>what</em> they want in plain English.<br class="hidden md:block" />
+      It compiles to bytecode. The AI VM executes it. No syntax. No boilerplate.
+    </p>
+
+    <div class="flex flex-wrap items-center justify-center gap-4 mb-12">
+      <a href="#demo" class="btn-primary text-base px-8 py-3">▶ Try the live demo</a>
+      <a href="https://github.com/theweekendprojects/ai-compiler" target="_blank" class="btn-ghost text-base px-8 py-3">View on GitHub</a>
+    </div>
+
+    <!-- Pipeline visual -->
+    <div class="flex justify-center mb-4">
+      <div class="glass px-6 py-3 inline-flex">
+        <div class="pipeline text-sm">
+          <span class="pipeline-step source">.aic</span>
+          <span class="pipeline-arrow">→</span>
+          <span class="pipeline-step compile">aicompiler compile</span>
+          <span class="pipeline-arrow">→</span>
+          <span class="pipeline-step compile">.aibc</span>
+          <span class="pipeline-arrow">→</span>
+          <span class="pipeline-step run">aivm run</span>
+          <span class="pipeline-arrow">→</span>
+          <span class="pipeline-step run">✓ output</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Social proof numbers -->
+    <div class="flex flex-wrap justify-center gap-8 mt-10 text-center">
+      {[
+        { value: "0", label: "lines of boilerplate" },
+        { value: "∞", label: "models supported" },
+        { value: "2", label: "steps: compile + run" },
+      ].map(s => (
+        <div>
+          <div class="text-3xl font-black gradient-text">{s.value}</div>
+          <div class="text-sm text-[var(--color-muted)] mt-1">{s.label}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Live Demo Section -->
+  <section id="demo" class="relative z-10 px-6 py-16">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-10">
+        <h2 class="text-3xl md:text-4xl font-black mb-3">
+          Try it <span class="gradient-text">right now</span>
+        </h2>
+        <p class="text-[var(--color-muted)] max-w-xl mx-auto">
+          Write your intent in the editor. Click <strong class="text-white">Run it now</strong>. Watch the AI VM execute it live.
+          No account. No setup. No API key needed.
+        </p>
+      </div>
+      <LiveDemo client:load />
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section id="how-it-works" class="relative z-10 px-6 py-16">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-black mb-3">How it <span class="gradient-text">works</span></h2>
+        <p class="text-[var(--color-muted)]">Three concepts. That's all you need to know.</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        {[
+          {
+            step: "01",
+            icon: "✍️",
+            title: "Write a .aic file",
+            desc: "Describe what you want in plain English inside a simple spec file. No semicolons. No type annotations. Just intent.",
+            badge: "source",
+            code: `module Greeter\n\nintent sayHello:\n  Say hello creatively.`,
+          },
+          {
+            step: "02",
+            icon: "⚡",
+            title: "Compile to .aibc",
+            desc: "The AI Compiler parses your spec and produces bytecode — a structured JSON artifact enriched with tool bindings, model selection, and cache hints.",
+            badge: "compile",
+            code: `aicompiler compile app.aic\n→ app.aibc ✓`,
+          },
+          {
+            step: "03",
+            icon: "🚀",
+            title: "Run with aivm",
+            desc: "The AI VM reads the bytecode and executes each intent via the language model of your choice — Claude, Nova Micro, Gemini, and more.",
+            badge: "run",
+            code: `aivm run app.aibc\n→ Hello, World! ✓`,
+          },
+        ].map(item => (
+          <div class="feature-card relative overflow-hidden">
+            <div class="text-5xl font-black text-[var(--color-border)] absolute top-4 right-4 select-none leading-none">
+              {item.step}
+            </div>
+            <div class="text-3xl mb-3">{item.icon}</div>
+            <div class={`badge badge-${item.badge === "source" ? "purple" : item.badge === "compile" ? "cyan" : "green"} mb-3 text-xs`}>
+              {item.badge}
+            </div>
+            <h3 class="text-lg font-bold mb-2">{item.title}</h3>
+            <p class="text-[var(--color-muted)] text-sm mb-4 leading-relaxed">{item.desc}</p>
+            <pre class="text-xs font-mono text-[var(--color-accent-2)] bg-[var(--color-surface-2)] rounded-lg p-3 overflow-auto">{item.code}</pre>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Features grid -->
+  <section id="features" class="relative z-10 px-6 py-16">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-black mb-3">Built for <span class="gradient-text">everyone</span></h2>
+        <p class="text-[var(--color-muted)]">Whether you're a developer or have never written a line of code.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {[
+          { icon: "🧠", title: "Intent-first", desc: "Write what you want, not how to do it. The AI figures out the implementation." },
+          { icon: "🔀", title: "Any AI model", desc: "Claude, Nova Micro, Gemini — swap models with one flag. All routed through Cloudflare AI Gateway." },
+          { icon: "🔒", title: "Deterministic builds", desc: ".aibc lock files ensure the same spec always produces the same bytecode. Reproducible like javac." },
+          { icon: "⚡", title: "Two-step pipeline", desc: "Compile once, run anywhere. Enrich bytecode between steps — add policies, tool bindings, provider hints." },
+          { icon: "🌐", title: "CLI + Web", desc: "Use the CLI locally or run specs live in the browser at aicompiler.dev — no install needed." },
+          { icon: "🛠️", title: "Open source", desc: "MIT licensed. Fork it, extend it, build your own AI languages on top of it." },
+        ].map(f => (
+          <div class="feature-card">
+            <div class="text-2xl mb-3">{f.icon}</div>
+            <h3 class="font-bold mb-2">{f.title}</h3>
+            <p class="text-[var(--color-muted)] text-sm leading-relaxed">{f.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Who is it for -->
+  <section class="relative z-10 px-6 py-16">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-black mb-3">Who is it <span class="gradient-text">for?</span></h2>
+      </div>
+      <div class="grid md:grid-cols-2 gap-6">
+        {[
+          {
+            audience: "Developers",
+            icon: "👨‍💻",
+            color: "purple",
+            points: [
+              "Replace boilerplate with intent-driven specs",
+              "Swap LLM providers without changing code",
+              "Use the CLI in your existing CI/CD pipeline",
+              "Build AI-powered microservices from .aic files",
+            ],
+          },
+          {
+            audience: "Non-developers",
+            icon: "💡",
+            color: "cyan",
+            points: [
+              "No coding knowledge required",
+              "Write what you want in plain English",
+              "Run it live in the browser — no install",
+              "Describe business logic, let AI handle the rest",
+            ],
+          },
+        ].map(card => (
+          <div class={`glass p-6 border-[var(--color-${card.color === "purple" ? "primary" : "accent"})]`}>
+            <div class="flex items-center gap-3 mb-5">
+              <span class="text-3xl">{card.icon}</span>
+              <h3 class="text-xl font-black">{card.audience}</h3>
+            </div>
+            <ul class="space-y-3">
+              {card.points.map(p => (
+                <li class="flex items-start gap-2 text-[var(--color-muted)] text-sm">
+                  <span class={`mt-0.5 text-${card.color === "purple" ? "[var(--color-primary-glow)]" : "[var(--color-accent)]"}`}>✓</span>
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="relative z-10 px-6 py-20 text-center">
+    <div class="max-w-2xl mx-auto">
+      <h2 class="text-4xl md:text-5xl font-black mb-6">
+        Start writing <span class="gradient-text">intent.</span>
+      </h2>
+      <p class="text-[var(--color-muted)] text-lg mb-8">
+        The future of programming isn't more syntax — it's less.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="#demo" class="btn-primary text-base px-8 py-3">▶ Try the demo</a>
+        <a href="https://github.com/theweekendprojects/ai-compiler" target="_blank" class="btn-ghost text-base px-8 py-3">Star on GitHub ★</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="relative z-10 border-t border-[var(--color-border)] px-6 py-8">
+    <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-[var(--color-muted)]">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xs">AI</div>
+        <span>aicompiler.dev — by <a href="https://github.com/theweekendprojects" class="hover:text-white transition-colors">The Weekend Projects</a></span>
+      </div>
+      <div class="flex gap-5">
+        <a href="https://github.com/theweekendprojects/ai-compiler" target="_blank" class="hover:text-white transition-colors">GitHub</a>
+        <a href="https://github.com/theweekendprojects/ai-compiler/blob/main/LICENSE" target="_blank" class="hover:text-white transition-colors">MIT License</a>
+        <a href="https://github.com/theweekendprojects/ai-compiler/issues" target="_blank" class="hover:text-white transition-colors">Issues</a>
+      </div>
+    </div>
+  </footer>
+</Layout>
