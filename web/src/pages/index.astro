@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { LiveDemo } from "../components/LiveDemo";
+import { ComputingParadigmDiagram } from "../components/ComputingParadigmDiagram";
 import "../styles/global.css";
 ---
 
@@ -98,6 +99,11 @@ import "../styles/global.css";
         </tbody>
       </table>
     </div>
+  </section>
+
+  <!-- ═══ COMPUTING PARADIGM DIAGRAM ═══ -->
+  <section style="position:relative;z-index:10;padding:4rem 1.5rem 5rem;min-height:600px;">
+    <ComputingParadigmDiagram client:load />
   </section>
 
   <!-- ═══ DEMO ═══ -->
