@@ -44,21 +44,21 @@ import "../styles/global.css";
 
     <!-- H1 -->
     <h1 class="reveal reveal-delay-1" style="font-size:clamp(2.5rem,6vw,5.5rem);font-weight:900;line-height:1.05;letter-spacing:-0.03em;margin:0 0 1.5rem;text-wrap:balance;">
-      The first language where<br />
-      <span class="gradient-text">the LLM is the CPU.</span>
+      The first virtual machine<br />
+      <span class="gradient-text">powered by an LLM.</span>
     </h1>
 
-    <!-- Subheading — 3 clean lines, no wrapping mess -->
+    <!-- Subheading -->
     <div class="reveal reveal-delay-2" style="display:flex;flex-direction:column;gap:0.375rem;margin-bottom:1.75rem;color:var(--muted);font-size:clamp(0.95rem,2vw,1.1rem);line-height:1.7;">
       <p style="margin:0;">You write <span class="badge-code">.aic</span> — plain Markdown, no code.</p>
       <p style="margin:0;">aiCompiler resolves all ambiguity at compile time.</p>
-      <p style="margin:0;">aiVM executes step by step. <strong style="color:var(--text);">The LLM reads opcodes like a CPU reads machine code.</strong></p>
+      <p style="margin:0;"><strong style="color:var(--text);">aiVM executes intent opcodes using an LLM — just as the JVM executes bytecode using a CPU.</strong></p>
     </div>
 
     <!-- Comparison box -->
     <div class="reveal reveal-delay-3 compare-box" style="max-width:36rem;margin:0 auto 2rem;text-align:left;">
-      <div class="them">LangChain / LangGraph → developers orchestrate LLM steps in Python</div>
-      <div class="us"><span>aiCompiler</span> → anyone writes intent in Markdown. <span>LLM IS the runtime.</span></div>
+      <div class="them">LangChain / LangGraph → orchestrate LLM calls in Python code</div>
+      <div class="us"><span>aiCompiler</span> → write intent in Markdown. <span>aiVM is the runtime. LLM is its engine.</span></div>
     </div>
 
     <!-- CTAs -->
@@ -89,13 +89,13 @@ import "../styles/global.css";
       <table class="era-table" style="min-width:32rem;margin:0 auto;">
         <thead>
           <tr>
-            <th>Era</th><th>Language</th><th>Compiler</th><th>CPU</th>
+            <th>Era</th><th>Language</th><th>Compiler</th><th>Virtual Machine</th><th>Engine</th>
           </tr>
         </thead>
         <tbody>
-          <tr><td>1950s</td><td>Assembly</td><td>Assembler</td><td>Silicon</td></tr>
-          <tr><td>1990s</td><td>Java</td><td>javac</td><td>JVM</td></tr>
-          <tr class="highlight"><td>2026</td><td>.aic</td><td>aiCompiler</td><td>LLM</td></tr>
+          <tr><td>1950s</td><td>Assembly</td><td>Assembler</td><td>—</td><td>Silicon</td></tr>
+          <tr><td>1990s</td><td>Java</td><td>javac</td><td>JVM</td><td>Silicon CPU</td></tr>
+          <tr class="highlight"><td>2026</td><td>.aic</td><td>aiCompiler</td><td>aiVM</td><td>LLM</td></tr>
         </tbody>
       </table>
     </div>
@@ -203,7 +203,7 @@ import "../styles/global.css";
   <section style="position:relative;z-index:10;padding:5rem 1.5rem;text-align:center;">
     <div style="max-width:36rem;margin:0 auto;">
       <h2 style="font-size:clamp(2rem,5vw,3.5rem);font-weight:900;letter-spacing:-0.03em;margin:0 0 1rem;text-wrap:balance;line-height:1.1;">
-        The LLM is the CPU.<br /><span class="gradient-text">Try it in 30 seconds.</span>
+        A new kind of VM.<br /><span class="gradient-text">Try it in 30 seconds.</span>
       </h2>
       <p style="color:var(--muted);font-size:1rem;margin:0 0 2rem;line-height:1.7;">
         No install. No account. No API key. Just open the playground and run.

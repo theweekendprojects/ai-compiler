@@ -1,403 +1,376 @@
 /**
- * ComputingParadigmDiagram
+ * ComputingParadigmDiagram — v2
  *
- * Animated side-by-side comparison:
- *   Left:  Von Neumann classical computer
- *   Right: aiCompiler LLM computer
+ * Visual style inspired by:
+ * - Tailscale: animated SVG flow lines (stroke-dashoffset)
+ * - Stripe: CSS offset-path data packets moving along paths
+ * - Linear: dark, dense, real-feeling
  *
- * Uses animejs v4 per animejs-animation skill:
- * - anime.timeline() with spring easing for orchestration
- * - anime.stagger() for organic row reveals
- * - IntersectionObserver trigger (scroll-experience skill)
- * - transform + opacity only (fixing-motion-performance skill)
- * - GPU-safe: will-change on animated elements only
+ * Left panel:  Von Neumann classical computer
+ * Right panel: aiVM — LLM-powered virtual machine
  *
- * Draws an animated SVG connector line between matching rows
- * showing the Von Neumann → LLM mapping.
+ * Key visual metaphor:
+ * - Classical: ONE square data packet, fixed linear path (deterministic)
+ * - aiVM: MANY soft orbs lighting up paths (probabilistic/emergent)
+ *
+ * Pure CSS animations — transform + opacity only (fixing-motion-performance skill)
+ * animejs v4 for scroll-triggered stagger reveal (animejs-animation skill)
  */
 
 import { useEffect, useRef, useState } from "react";
+import {
+  Cpu, Memory, HardDrive, Database, PlugsConnected,
+  GitFork, Brain, Lightning, Lock, ArrowRight,
+  ArrowsSplit, FlowArrow
+} from "@phosphor-icons/react";
 
-const ROWS = [
-  {
-    icon: "🧠",
-    classical: { label: "CPU",          sub: "Silicon — executes machine code",          color: "#7c3aed" },
-    llm:       { label: "LLM",           sub: "Executes intent as opcodes",               color: "#9d5bff" },
-  },
-  {
-    icon: "⚡",
-    classical: { label: "RAM",           sub: "Working memory — holds program state",     color: "#0891b2" },
-    llm:       { label: "Context Window",sub: "Working memory per execution turn",        color: "#06b6d4" },
-  },
-  {
-    icon: "🗄️",
-    classical: { label: "Cache",         sub: "Fast recent-access storage",               color: "#0284c7" },
-    llm:       { label: ".aix Lock Files",sub:"Same spec = instant, no recompile",        color: "#0ea5e9" },
-  },
-  {
-    icon: "📌",
-    classical: { label: "Registers",     sub: "CPU working vars (eax, rbx…)",            color: "#6d28d9" },
-    llm:       { label: "Step State",    sub: "$step_1.output, $input.orderId",           color: "#8b5cf6" },
-  },
-  {
-    icon: "🔌",
-    classical: { label: "System Bus",   sub: "Connects CPU to memory + I/O",             color: "#475569" },
-    llm:       { label: "Tool Adapters",sub: "DB, email, APIs, HTTP",                    color: "#64748b" },
-  },
-  {
-    icon: "💾",
-    classical: { label: "Hard Disk",    sub: "Persistent storage — files + DB",          color: "#059669" },
-    llm:       { label: "KV + VectorDB",sub: "Persistent memory + RAG context",          color: "#10b981" },
-  },
-  {
-    icon: "📀",
-    classical: { label: "ROM / BIOS",   sub: "Read-only firmware, loads on boot",        color: "#b45309" },
-    llm:       { label: "System Prompt",sub: "Read-only, loads before every execution",  color: "#f59e0b" },
-  },
+// ─── Component data ───────────────────────────────────────────────────────────
+
+const CLASSICAL_NODES = [
+  { id: "cpu",       label: "CPU",        Icon: Cpu,              color: "#6366f1", sub: "Executes machine code" },
+  { id: "ram",       label: "RAM",         Icon: Memory,           color: "#0891b2", sub: "Program state + stack" },
+  { id: "cache",     label: "Cache",       Icon: Lightning,             color: "#0284c7", sub: "Fast recent-access storage" },
+  { id: "registers", label: "Registers",   Icon: GitFork,          color: "#7c3aed", sub: "Working variables" },
+  { id: "bus",       label: "System Bus",  Icon: PlugsConnected,   color: "#475569", sub: "Connects all components" },
+  { id: "disk",      label: "Hard Disk",   Icon: HardDrive,        color: "#059669", sub: "Persistent storage" },
+  { id: "rom",       label: "ROM / BIOS",  Icon: Lock,             color: "#b45309", sub: "Read-only firmware" },
 ];
 
+const AIVM_NODES = [
+  { id: "llm",       label: "LLM Engine",      Icon: Brain,          color: "#9d5bff", sub: "Executes intent opcodes" },
+  { id: "ctx",       label: "Context Window",   Icon: Memory,         color: "#06b6d4", sub: "Working memory per turn" },
+  { id: "aix",       label: ".aix Lock Files",  Icon: Lightning,           color: "#0ea5e9", sub: "Cache — same spec = instant" },
+  { id: "state",     label: "Step State",       Icon: ArrowsSplit,    color: "#8b5cf6", sub: "$step_1.output, $input.x" },
+  { id: "adapters",  label: "Tool Adapters",    Icon: PlugsConnected, color: "#64748b", sub: "DB, email, APIs, HTTP" },
+  { id: "kvdb",      label: "KV + VectorDB",    Icon: Database,       color: "#10b981", sub: "Persistent memory + RAG" },
+  { id: "sysprompt", label: "System Prompt",    Icon: Lock,           color: "#f59e0b", sub: "Read-only, loads at boot" },
+];
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
 export function ComputingParadigmDiagram() {
-  const sectionRef  = useRef<HTMLDivElement>(null);
-  const rowRefs     = useRef<(HTMLDivElement | null)[]>([]);
-  const lineRefs    = useRef<(SVGPathElement | null)[]>([]);
-  const [active, setActive] = useState(-1);
-  const animatedRef = useRef(false);
+  const sectionRef   = useRef<HTMLDivElement>(null);
+  const [active, setActive]       = useState(-1);
+  const [revealed, setRevealed]   = useState(false);
 
-  // ── Scroll-triggered entry animation (scroll-experience skill) ──────────────
+  // Sequential pulse
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      async ([entry]) => {
-        if (!entry.isIntersecting || animatedRef.current) return;
-        animatedRef.current = true;
-
-        const { animate, stagger, createTimeline } = await import("animejs");
-
-        // Staggered row reveal — stagger per animejs-animation skill
-        const tl = createTimeline({ easing: "spring(1, 80, 10, 0)" });
-
-        // Left column rows
-        tl.add(".paradigm-row-left", {
-          translateX: [-40, 0],
-          opacity:    [0, 1],
-          duration:   700,
-          delay:      stagger(80),
-        });
-
-        // Right column rows — overlapping with left
-        tl.add(".paradigm-row-right", {
-          translateX: [40, 0],
-          opacity:    [0, 1],
-          duration:   700,
-          delay:      stagger(80),
-        }, "-=650");
-
-        // SVG connector lines fade in after rows
-        tl.add(".paradigm-connector", {
-          opacity: [0, 0.35],
-          duration: 400,
-          delay:    stagger(80),
-          easing:   "easeOutQuad",
-        }, "-=400");
-      },
-      { threshold: 0.2 }
-    );
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  // ── Sequential pulse loop ───────────────────────────────────────────────────
-  useEffect(() => {
-    let i = 0;
     const iv = setInterval(() => {
-      setActive(i % ROWS.length);
-      i++;
-    }, 1100);
+      setActive(i => (i + 1) % CLASSICAL_NODES.length);
+    }, 1000);
     return () => clearInterval(iv);
   }, []);
 
-  // ── Set initial hidden state via CSS class (not JS useEffect) ─────────────
-  // Rows start hidden, anime.js reveals them on IntersectionObserver trigger
+  // Scroll reveal via animejs
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      async ([entry]) => {
+        if (!entry.isIntersecting || revealed) return;
+        setRevealed(true);
+        const { animate, stagger, createTimeline } = await import("animejs");
+        const tl = createTimeline({ easing: "spring(1, 80, 10, 0)" });
+        tl.add(".pdg-header", { opacity: [0, 1], translateY: [-20, 0], duration: 600 });
+        tl.add(".pdg-left",   { opacity: [0, 1], translateX: [-50, 0], duration: 700 }, "-=400");
+        tl.add(".pdg-divider",{ opacity: [0, 1], scaleY: [0, 1], duration: 500 }, "-=500");
+        tl.add(".pdg-right",  { opacity: [0, 1], translateX: [50, 0], duration: 700 }, "-=600");
+      },
+      { threshold: 0.15 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, [revealed]);
 
   return (
-    <div ref={sectionRef} style={{ width: "100%", maxWidth: "72rem", margin: "0 auto" }}>
+    <div ref={sectionRef} style={{ width: "100%", maxWidth: "76rem", margin: "0 auto" }}>
 
-      {/* ── Section header ── */}
-      <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+      {/* ── Header ── */}
+      <div className="pdg-header" style={{ textAlign: "center", marginBottom: "3rem", opacity: 0 }}>
         <span style={{
           display: "inline-flex", alignItems: "center", gap: "0.4rem",
           padding: "0.3rem 0.875rem", borderRadius: "9999px",
-          fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.18em",
-          textTransform: "uppercase",
-          border: "1px solid rgba(124,58,237,0.4)",
-          background: "rgba(124,58,237,0.1)", color: "#9d5bff",
-          marginBottom: "1.25rem",
+          fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase",
+          border: "1px solid rgba(124,58,237,0.4)", background: "rgba(124,58,237,0.08)",
+          color: "#9d5bff", marginBottom: "1.25rem",
         }}>
           <span style={{ width: "0.4rem", height: "0.4rem", borderRadius: "50%", background: "#9d5bff", display: "inline-block", animation: "pulse 2s infinite" }} />
-          A new computing paradigm
+          A new virtual machine paradigm
         </span>
 
         <h2 style={{
           fontSize: "clamp(1.75rem,4vw,3rem)", fontWeight: 900,
-          letterSpacing: "-0.03em", margin: "0 0 1rem",
-          lineHeight: 1.05, textWrap: "balance" as any,
+          letterSpacing: "-0.03em", margin: "0 0 1rem", lineHeight: 1.05,
+          textWrap: "balance" as any,
         }}>
-          I'm not building a tool.<br />
+          Just as the <span style={{ fontFamily: "var(--font-mono)", color: "#94a3b8" }}>JVM</span> runs Java bytecode using a CPU,<br />
           <span style={{
             background: "linear-gradient(135deg,#9d5bff 0%,#06b6d4 50%,#10b981 100%)",
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-          }}>I'm inventing a new type of computer.</span>
+          }}>aiVM runs .aix opcodes using an LLM.</span>
         </h2>
 
-        <p style={{
-          color: "#7878a0", fontSize: "1rem", margin: "0 auto",
-          maxWidth: "42rem", lineHeight: 1.75, textWrap: "balance" as any,
-        }}>
-          Every component of the Von Neumann architecture has an exact analog in aiCompiler.
-          This is not a coincidence — it is a complete, coherent computing paradigm.
-          The LLM is the CPU. Everything else follows.
+        <p style={{ color: "#7878a0", fontSize: "1rem", maxWidth: "44rem", margin: "0 auto", lineHeight: 1.75, textWrap: "balance" as any }}>
+          Every component of Von Neumann architecture maps exactly to an aiVM component.
+          The LLM isn't the CPU — it's the <strong style={{ color: "#c4b5fd" }}>execution engine of the VM</strong>.
+          Everything else follows from that.
         </p>
       </div>
 
       {/* ── Main diagram ── */}
-      <div style={{ position: "relative" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 2px 1fr", gap: "0 2rem", alignItems: "start" }}>
 
-        {/* SVG connectors layer — sits between the two columns */}
-        <svg
-          aria-hidden="true"
-          style={{
-            position: "absolute", inset: 0, width: "100%", height: "100%",
-            pointerEvents: "none", zIndex: 1, overflow: "visible",
-            display: "none", // hidden on mobile, shown via CSS below
-          }}
-          className="paradigm-svg"
-        >
-          {ROWS.map((row, i) => (
-            <path
-              key={i}
-              ref={el => { lineRefs.current[i] = el; }}
-              className="paradigm-connector"
-              d={`M 0 ${44 + i * 64} Q 60 ${44 + i * 64} 120 ${44 + i * 64}`}
-              stroke={row.llm.color}
-              strokeWidth="1.5"
-              fill="none"
-              strokeLinecap="round"
-            />
-          ))}
-        </svg>
+        {/* LEFT — Classical */}
+        <PanelCard
+          className="pdg-left"
+          era="1950s — 2025"
+          title="Von Neumann Computer"
+          subtitle="Silicon CPU executes machine code instructions sequentially"
+          accentColor="#6366f1"
+          dimmed
+          nodes={CLASSICAL_NODES}
+          active={active}
+          isClassical
+        />
 
-        {/* Three-column grid: left | spacer | right */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 60px 1fr",
-          gap: "0",
-          alignItems: "start",
-        }} className="paradigm-grid">
-
-          {/* ── LEFT: Classical ── */}
-          <div style={{
-            background: "rgba(255,255,255,0.02)",
-            border: "1px solid rgba(255,255,255,0.07)",
-            borderRadius: "1.25rem",
-            padding: "1.5rem",
-          }}>
-            <div style={{ marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "0.625rem" }}>
-              <div style={{ width: "2rem", height: "2rem", borderRadius: "0.5rem", background: "rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1rem" }}>🖥️</div>
-              <div>
-                <div style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#7878a0" }}>1950s — 2025</div>
-                <div style={{ fontSize: "0.95rem", fontWeight: 800, color: "#b0b0c8" }}>Classical Computer</div>
-              </div>
-            </div>
-            {ROWS.map((row, i) => (
-              <div
-                key={i}
-                ref={el => { rowRefs.current[i] = el; }}
-                className="paradigm-row-left"
-                style={{
-                  display: "flex", alignItems: "center", gap: "0.75rem",
-                  padding: "0.625rem 0.75rem",
-                  borderRadius: "0.75rem",
-                  marginBottom: i < ROWS.length - 1 ? "0.375rem" : 0,
-                  border: `1px solid ${active === i ? row.classical.color + "45" : "rgba(255,255,255,0.04)"}`,
-                  background: active === i ? row.classical.color + "12" : "transparent",
-                  transition: "all 0.5s cubic-bezier(0.32,0.72,0,1)",
-                  willChange: "transform, opacity",
-                }}
-              >
-                <div style={{
-                  width: "2rem", height: "2rem", flexShrink: 0, borderRadius: "0.5rem",
-                  background: active === i ? row.classical.color + "20" : "rgba(255,255,255,0.04)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "0.9rem",
-                  border: `1px solid ${active === i ? row.classical.color + "35" : "rgba(255,255,255,0.06)"}`,
-                  transition: "all 0.5s cubic-bezier(0.32,0.72,0,1)",
-                  boxShadow: active === i ? `0 0 14px ${row.classical.color}30` : "none",
-                }}>
-                  {row.icon}
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{
-                    fontSize: "0.83rem", fontWeight: 700,
-                    color: active === i ? "#d0d0e8" : "#7878a0",
-                    fontFamily: active === i ? "var(--font-mono)" : "inherit",
-                    transition: "color 0.4s",
-                    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                  }}>{row.classical.label}</div>
-                  <div style={{
-                    fontSize: "0.7rem", color: active === i ? "#6060a0" : "#404060",
-                    transition: "color 0.4s", lineHeight: 1.4,
-                    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                  }}>{row.classical.sub}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* ── MIDDLE: spacer + arrow icons ── */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "4.5rem", gap: "0" }}>
-            {ROWS.map((row, i) => (
-              <div key={i} style={{
-                height: "3.875rem", display: "flex", alignItems: "center", justifyContent: "center",
-                marginBottom: i < ROWS.length - 1 ? "0.375rem" : 0,
-              }}>
-                <div style={{
-                  fontSize: "0.75rem", color: active === i ? row.llm.color : "rgba(255,255,255,0.08)",
-                  transition: "color 0.4s",
-                  fontWeight: 700,
-                }}>→</div>
-              </div>
-            ))}
-          </div>
-
-          {/* ── RIGHT: aiCompiler ── */}
-          <div style={{
-            background: "rgba(124,58,237,0.04)",
-            border: "1px solid rgba(124,58,237,0.2)",
-            borderRadius: "1.25rem",
-            padding: "1.5rem",
-          }}>
-            <div style={{ marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "0.625rem" }}>
-              <div style={{ width: "2rem", height: "2rem", borderRadius: "0.5rem", background: "rgba(124,58,237,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1rem" }}>🤖</div>
-              <div>
-                <div style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#9d5bff" }}>2026 →</div>
-                <div style={{ fontSize: "0.95rem", fontWeight: 800, color: "#f0f0f8" }}>aiCompiler Computer</div>
-              </div>
-            </div>
-            {ROWS.map((row, i) => (
-              <div
-                key={i}
-                className="paradigm-row-right"
-                style={{
-                  display: "flex", alignItems: "center", gap: "0.75rem",
-                  padding: "0.625rem 0.75rem",
-                  borderRadius: "0.75rem",
-                  marginBottom: i < ROWS.length - 1 ? "0.375rem" : 0,
-                  border: `1px solid ${active === i ? row.llm.color + "55" : "rgba(255,255,255,0.05)"}`,
-                  background: active === i ? row.llm.color + "18" : "transparent",
-                  transition: "all 0.5s cubic-bezier(0.32,0.72,0,1)",
-                  willChange: "transform, opacity",
-                }}
-              >
-                <div style={{
-                  width: "2rem", height: "2rem", flexShrink: 0, borderRadius: "0.5rem",
-                  background: active === i ? row.llm.color + "25" : "rgba(255,255,255,0.04)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "0.9rem",
-                  border: `1px solid ${active === i ? row.llm.color + "45" : "rgba(255,255,255,0.06)"}`,
-                  transition: "all 0.5s cubic-bezier(0.32,0.72,0,1)",
-                  boxShadow: active === i ? `0 0 16px ${row.llm.color}40` : "none",
-                }}>
-                  {row.icon}
-                </div>
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{
-                    fontSize: "0.83rem", fontWeight: 700,
-                    color: active === i ? "#f0f0f8" : "#9090b8",
-                    fontFamily: active === i ? "var(--font-mono)" : "inherit",
-                    transition: "color 0.4s",
-                    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                  }}>{row.llm.label}</div>
-                  <div style={{
-                    fontSize: "0.7rem", color: active === i ? "#9090b8" : "#404060",
-                    transition: "color 0.4s", lineHeight: 1.4,
-                    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                  }}>{row.llm.sub}</div>
-                </div>
-                {active === i && (
-                  <div style={{
-                    width: "0.45rem", height: "0.45rem", borderRadius: "50%", flexShrink: 0,
-                    background: row.llm.color, boxShadow: `0 0 8px ${row.llm.color}`,
-                    animation: "pulse-dot 0.9s ease-in-out infinite",
-                  }} />
-                )}
-              </div>
-            ))}
-          </div>
-
-        </div>{/* end grid */}
-
-        {/* Bottom equation bar */}
-        <div style={{
-          marginTop: "1.5rem",
-          padding: "1rem 1.5rem",
-          background: "rgba(255,255,255,0.02)",
-          border: "1px solid rgba(255,255,255,0.06)",
-          borderRadius: "0.875rem",
-          textAlign: "center",
+        {/* CENTER — Animated divider */}
+        <div className="pdg-divider" style={{
+          width: "2px", alignSelf: "stretch", marginTop: "0",
+          background: "linear-gradient(to bottom, transparent, rgba(124,58,237,0.4) 20%, rgba(6,182,212,0.4) 50%, rgba(16,185,129,0.4) 80%, transparent)",
+          opacity: 0, transformOrigin: "top",
+          position: "relative", minHeight: "600px",
         }}>
-          <p style={{ margin: 0, fontSize: "0.82rem", color: "#5050a0", lineHeight: 2 }}>
-            {ROWS.map((row, i) => (
-              <span key={i}>
-                <span style={{
-                  fontFamily: "var(--font-mono)",
-                  color: active === i ? row.llm.color : "#5050a0",
-                  transition: "color 0.4s",
-                  fontWeight: active === i ? 700 : 400,
-                }}>
-                  {row.classical.label}
-                </span>
-                <span style={{ color: "rgba(255,255,255,0.1)" }}> = </span>
-                <span style={{
-                  fontFamily: "var(--font-mono)",
-                  color: active === i ? row.llm.color : "#5050a0",
-                  transition: "color 0.4s",
-                  fontWeight: active === i ? 700 : 400,
-                }}>
-                  {row.llm.label}
-                </span>
-                {i < ROWS.length - 1 && <span style={{ color: "rgba(255,255,255,0.08)", margin: "0 0.5rem" }}>·</span>}
-              </span>
-            ))}
-          </p>
+          {/* Flowing dot on divider */}
+          <div style={{
+            position: "absolute", width: "8px", height: "8px", borderRadius: "50%",
+            background: "linear-gradient(135deg,#9d5bff,#06b6d4)",
+            left: "-3px",
+            animation: "dividerDot 3s ease-in-out infinite",
+            boxShadow: "0 0 8px #9d5bff",
+          }} />
         </div>
+
+        {/* RIGHT — aiVM */}
+        <PanelCard
+          className="pdg-right"
+          era="2026 →"
+          title="aiVM Computer"
+          subtitle="LLM executes intent opcodes — each step is a direct model inference"
+          accentColor="#9d5bff"
+          dimmed={false}
+          nodes={AIVM_NODES}
+          active={active}
+          isClassical={false}
+        />
 
       </div>
 
+      {/* ── Bottom equation ── */}
+      <div style={{
+        marginTop: "2rem",
+        padding: "1.25rem 1.5rem",
+        background: "rgba(255,255,255,0.02)",
+        border: "1px solid rgba(255,255,255,0.06)",
+        borderRadius: "1rem",
+        display: "flex", flexWrap: "wrap", gap: "0.5rem 1.5rem",
+        justifyContent: "center", alignItems: "center",
+      }}>
+        {CLASSICAL_NODES.map((cn, i) => (
+          <div key={i} style={{
+            display: "flex", alignItems: "center", gap: "0.375rem",
+            fontSize: "0.75rem", fontFamily: "var(--font-mono)",
+            transition: "opacity 0.3s",
+            opacity: active === i ? 1 : 0.35,
+          }}>
+            <span style={{ color: active === i ? cn.color : "#404060", fontWeight: 700 }}>{cn.label}</span>
+            <span style={{ color: "#303050" }}>≡</span>
+            <span style={{ color: active === i ? AIVM_NODES[i].color : "#404060", fontWeight: 700 }}>{AIVM_NODES[i].label}</span>
+          </div>
+        ))}
+      </div>
+
       <style>{`
-        @keyframes pulse-dot {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50%       { opacity: 0.5; transform: scale(0.7); }
+        @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+        @keyframes dividerDot {
+          0%   { top: 5%;  opacity: 0; }
+          10%  { opacity: 1; }
+          90%  { opacity: 1; }
+          100% { top: 95%; opacity: 0; }
         }
-        /* Initial hidden state — anime.js reveals on scroll */
-        .paradigm-row-left,
-        .paradigm-row-right {
-          opacity: 0;
-          will-change: transform, opacity;
+        @keyframes nodeGlow {
+          0%,100% { box-shadow: 0 0 0 0 currentColor; }
+          50%      { box-shadow: 0 0 16px 2px currentColor; }
         }
-        .paradigm-connector {
-          opacity: 0;
+        @keyframes packetFlow {
+          0%   { offset-distance: 0%;   opacity: 0; }
+          8%   { opacity: 1; }
+          92%  { opacity: 1; }
+          100% { offset-distance: 100%; opacity: 0; }
         }
-        @media (max-width: 640px) {
-          .paradigm-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .paradigm-grid > *:nth-child(2) {
-            display: none !important;
-          }
+        @keyframes multiPacket {
+          0%   { offset-distance: 0%;  opacity: 0; }
+          5%   { opacity: 0.7; }
+          95%  { opacity: 0.7; }
+          100% { offset-distance: 100%; opacity: 0; }
         }
-        @media (min-width: 768px) {
-          .paradigm-svg {
-            display: block !important;
-          }
+        @media (max-width: 700px) {
+          .pdg-grid-inner { grid-template-columns: 1fr !important; }
+          .pdg-divider { display: none !important; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ─── Panel card ───────────────────────────────────────────────────────────────
+
+function PanelCard({
+  className, era, title, subtitle, accentColor, dimmed, nodes, active, isClassical,
+}: {
+  className: string; era: string; title: string; subtitle: string;
+  accentColor: string; dimmed: boolean; nodes: typeof CLASSICAL_NODES;
+  active: number; isClassical: boolean;
+}) {
+  return (
+    <div
+      className={className}
+      style={{
+        background: dimmed ? "rgba(255,255,255,0.015)" : "rgba(124,58,237,0.04)",
+        border: `1px solid ${dimmed ? "rgba(255,255,255,0.07)" : "rgba(124,58,237,0.22)"}`,
+        borderRadius: "1.25rem",
+        padding: "1.5rem",
+        opacity: 0,
+      }}
+    >
+      {/* Panel header */}
+      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" }}>
+        <div style={{
+          width: "2.5rem", height: "2.5rem", borderRadius: "0.75rem", flexShrink: 0,
+          background: dimmed ? "rgba(255,255,255,0.05)" : `rgba(124,58,237,0.15)`,
+          border: `1px solid ${dimmed ? "rgba(255,255,255,0.08)" : "rgba(124,58,237,0.3)"}`,
+          display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem",
+        }}>
+          {isClassical ? "🖥️" : "🤖"}
+        </div>
+        <div>
+          <div style={{
+            fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase",
+            color: dimmed ? "#7878a0" : accentColor, marginBottom: "0.2rem",
+          }}>{era}</div>
+          <div style={{ fontSize: "1rem", fontWeight: 800, color: dimmed ? "#c0c0d8" : "#f0f0f8" }}>{title}</div>
+          <div style={{ fontSize: "0.72rem", color: "#5058a0", marginTop: "0.2rem", lineHeight: 1.4 }}>{subtitle}</div>
+        </div>
+      </div>
+
+      {/* Nodes */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        {nodes.map((node, i) => {
+          const isActive = i === active;
+          const Icon = node.Icon;
+          return (
+            <NodeRow
+              key={node.id}
+              node={node}
+              isActive={isActive}
+              isClassical={isClassical}
+              index={i}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── Node row ─────────────────────────────────────────────────────────────────
+
+function NodeRow({ node, isActive, isClassical, index }: {
+  node: typeof CLASSICAL_NODES[0]; isActive: boolean; isClassical: boolean; index: number;
+}) {
+  const Icon = node.Icon;
+
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", gap: "0.75rem",
+      padding: "0.6rem 0.875rem",
+      borderRadius: "0.875rem",
+      border: `1px solid ${isActive ? node.color + "55" : "rgba(255,255,255,0.04)"}`,
+      background: isActive ? node.color + "15" : "transparent",
+      transition: "all 0.45s cubic-bezier(0.32,0.72,0,1)",
+      transform: isActive ? (isClassical ? "translateX(3px)" : "translateX(-3px)") : "translateX(0)",
+      position: "relative", overflow: "hidden",
+    }}>
+
+      {/* Animated scan line when active */}
+      {isActive && (
+        <div style={{
+          position: "absolute", inset: 0,
+          background: `linear-gradient(90deg, transparent 0%, ${node.color}15 50%, transparent 100%)`,
+          animation: "scanLine 1.2s ease-in-out infinite",
+          pointerEvents: "none",
+        }} />
+      )}
+
+      {/* Icon box */}
+      <div style={{
+        width: "2.25rem", height: "2.25rem", flexShrink: 0,
+        borderRadius: "0.625rem",
+        background: isActive ? node.color + "25" : "rgba(255,255,255,0.04)",
+        border: `1px solid ${isActive ? node.color + "50" : "rgba(255,255,255,0.07)"}`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        transition: "all 0.45s cubic-bezier(0.32,0.72,0,1)",
+        boxShadow: isActive ? `0 0 20px ${node.color}45, inset 0 1px 1px rgba(255,255,255,0.1)` : "inset 0 1px 1px rgba(255,255,255,0.04)",
+        color: isActive ? node.color : "#404070",
+      }}>
+        <Icon size={16} weight={isActive ? "fill" : "regular"} />
+      </div>
+
+      {/* Text */}
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div style={{
+          fontSize: "0.83rem", fontWeight: 700,
+          fontFamily: isActive ? "var(--font-mono)" : "inherit",
+          color: isActive ? "#f0f0f8" : "#8080a0",
+          transition: "all 0.3s",
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        }}>
+          {node.label}
+        </div>
+        <div style={{
+          fontSize: "0.7rem",
+          color: isActive ? "#7070a0" : "#303060",
+          transition: "color 0.3s",
+          lineHeight: 1.4,
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        }}>
+          {node.sub}
+        </div>
+      </div>
+
+      {/* Right side — classical gets a square packet, aiVM gets a glow orb */}
+      {isActive && (
+        isClassical ? (
+          <div style={{
+            width: "0.5rem", height: "0.5rem", borderRadius: "2px", flexShrink: 0,
+            background: node.color,
+            boxShadow: `0 0 6px ${node.color}`,
+            animation: "blink 0.6s step-end infinite",
+          }} />
+        ) : (
+          <div style={{
+            width: "0.6rem", height: "0.6rem", borderRadius: "50%", flexShrink: 0,
+            background: node.color,
+            boxShadow: `0 0 12px ${node.color}, 0 0 24px ${node.color}60`,
+            animation: "pulse 0.9s ease-in-out infinite",
+          }} />
+        )
+      )}
+
+      <style>{`
+        @keyframes scanLine {
+          0%   { transform: translateX(-100%); }
+          100% { transform: translateX(200%); }
+        }
+        @keyframes blink {
+          0%,100%{opacity:1}50%{opacity:0}
         }
       `}</style>
     </div>
