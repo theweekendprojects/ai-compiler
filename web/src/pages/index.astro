@@ -84,17 +84,17 @@ import "../styles/global.css";
       </div>
     </div>
 
-    <!-- Era table -->
-    <div class="reveal" style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-      <table class="era-table" style="min-width:32rem;margin:0 auto;">
+    <!-- Era table — horizontally scrollable on mobile -->
+    <div class="reveal" style="overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;">
+      <table class="era-table" style="min-width:28rem;margin:0 auto;">
         <thead>
           <tr>
-            <th>Era</th><th>Language</th><th>Compiler</th><th>Virtual Machine</th><th>Engine</th>
+            <th>Era</th><th>Language</th><th>Compiler</th><th>VM</th><th>Engine</th>
           </tr>
         </thead>
         <tbody>
           <tr><td>1950s</td><td>Assembly</td><td>Assembler</td><td>—</td><td>Silicon</td></tr>
-          <tr><td>1990s</td><td>Java</td><td>javac</td><td>JVM</td><td>Silicon CPU</td></tr>
+          <tr><td>1990s</td><td>Java</td><td>javac</td><td>JVM</td><td>CPU</td></tr>
           <tr class="highlight"><td>2026</td><td>.aic</td><td>aiCompiler</td><td>aiVM</td><td>LLM</td></tr>
         </tbody>
       </table>

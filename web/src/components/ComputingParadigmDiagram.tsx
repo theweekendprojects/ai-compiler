@@ -68,11 +68,13 @@ export function ComputingParadigmDiagram() {
         if (!entry.isIntersecting || revealed) return;
         setRevealed(true);
         const { animate, stagger, createTimeline } = await import("animejs");
+        const isMobile = window.innerWidth < 700;
+
         const tl = createTimeline({ easing: "spring(1, 80, 10, 0)" });
         tl.add(".pdg-header", { opacity: [0, 1], translateY: [-20, 0], duration: 600 });
-        tl.add(".pdg-left",   { opacity: [0, 1], translateX: [-50, 0], duration: 700 }, "-=400");
+        tl.add(".pdg-left",   { opacity: [0, 1], translateX: [isMobile ? -20 : -50, 0], duration: 700 }, "-=400");
         tl.add(".pdg-divider",{ opacity: [0, 1], scaleY: [0, 1], duration: 500 }, "-=500");
-        tl.add(".pdg-right",  { opacity: [0, 1], translateX: [50, 0], duration: 700 }, "-=600");
+        tl.add(".pdg-right",  { opacity: [0, 1], translateX: [isMobile ? 20 : 50, 0], duration: 700 }, "-=600");
       },
       { threshold: 0.15 }
     );
@@ -116,7 +118,7 @@ export function ComputingParadigmDiagram() {
       </div>
 
       {/* ── Main diagram ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 2px 1fr", gap: "0 2rem", alignItems: "start" }}>
+      <div className="pdg-main-grid" style={{ display: "grid", alignItems: "start" }}>
 
         {/* LEFT — Classical */}
         <PanelCard
@@ -199,21 +201,26 @@ export function ComputingParadigmDiagram() {
           0%,100% { box-shadow: 0 0 0 0 currentColor; }
           50%      { box-shadow: 0 0 16px 2px currentColor; }
         }
-        @keyframes packetFlow {
-          0%   { offset-distance: 0%;   opacity: 0; }
-          8%   { opacity: 1; }
-          92%  { opacity: 1; }
-          100% { offset-distance: 100%; opacity: 0; }
+
+        /* ── Responsive grid ── */
+        .pdg-main-grid {
+          grid-template-columns: 1fr 2px 1fr;
+          gap: 0 2rem;
         }
-        @keyframes multiPacket {
-          0%   { offset-distance: 0%;  opacity: 0; }
-          5%   { opacity: 0.7; }
-          95%  { opacity: 0.7; }
-          100% { offset-distance: 100%; opacity: 0; }
-        }
+
         @media (max-width: 700px) {
-          .pdg-grid-inner { grid-template-columns: 1fr !important; }
-          .pdg-divider { display: none !important; }
+          .pdg-main-grid {
+            grid-template-columns: 1fr !important;
+            gap: 1rem 0 !important;
+          }
+          .pdg-divider {
+            display: none !important;
+          }
+          .pdg-left,
+          .pdg-right {
+            /* Reset translateX animations on mobile */
+            transform: none !important;
+          }
         }
       `}</style>
     </div>
@@ -295,7 +302,6 @@ function NodeRow({ node, isActive, isClassical, index }: {
       border: `1px solid ${isActive ? node.color + "55" : "rgba(255,255,255,0.04)"}`,
       background: isActive ? node.color + "15" : "transparent",
       transition: "all 0.45s cubic-bezier(0.32,0.72,0,1)",
-      transform: isActive ? (isClassical ? "translateX(3px)" : "translateX(-3px)") : "translateX(0)",
       position: "relative", overflow: "hidden",
     }}>
 
