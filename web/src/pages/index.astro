@@ -5,7 +5,7 @@ import "../styles/global.css";
 ---
 
 <Layout>
-  <!-- Aurora background -->
+  <!-- Aurora + grid — fixed, never scroll -->
   <div class="aurora">
     <div class="aurora-blob"></div>
     <div class="aurora-blob"></div>
@@ -14,58 +14,62 @@ import "../styles/global.css";
   <div class="grid-bg"></div>
 
   <!-- Nav -->
-  <nav class="relative z-10 flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm">AI</div>
-      <span class="font-bold text-lg tracking-tight">aicompiler<span class="text-[var(--color-muted)]">.dev</span></span>
-    </div>
-    <div class="hidden md:flex items-center gap-6 text-sm text-[var(--color-muted)]">
-      <a href="#demo" class="hover:text-white transition-colors">Demo</a>
-      <a href="#how-it-works" class="hover:text-white transition-colors">How it works</a>
-      <a href="#features" class="hover:text-white transition-colors">Features</a>
-      <a href="https://github.com/theweekendprojects/ai-compiler" target="_blank" class="hover:text-white transition-colors flex items-center gap-1">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+  <nav style="position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;max-width:72rem;margin:0 auto;">
+    <a href="/" style="display:flex;align-items:center;gap:0.625rem;text-decoration:none;">
+      <div style="width:2rem;height:2rem;border-radius:0.5rem;background:linear-gradient(135deg,#7c3aed,#06b6d4);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:0.8rem;flex-shrink:0;">AI</div>
+      <span style="font-weight:800;font-size:1.05rem;letter-spacing:-0.02em;color:var(--text);">aicompiler<span style="color:var(--muted);">.dev</span></span>
+    </a>
+    <div class="nav-links" style="display:flex;align-items:center;gap:2rem;font-size:0.875rem;color:var(--muted);">
+      <a href="#demo" style="color:inherit;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Demo</a>
+      <a href="#how-it-works" style="color:inherit;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">How it works</a>
+      <a href="https://github.com/theweekendprojects/ai-compiler" target="_blank" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:0.25rem;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
         GitHub
       </a>
     </div>
-    <a href="#demo" class="btn-primary text-sm px-5 py-2">Try it free →</a>
+    <a href="#demo" class="btn-primary" style="font-size:0.85rem;padding:0.5rem 1.25rem;">Try it free →</a>
   </nav>
 
-  <!-- Hero -->
-  <section class="relative z-10 text-center px-6 pt-16 pb-12 max-w-5xl mx-auto">
-    <div class="inline-flex items-center gap-2 badge badge-purple mb-6">
-      <span class="w-2 h-2 rounded-full bg-violet-400 animate-pulse"></span>
-      Not a framework. Not an agent wrapper. A new computing paradigm.
+  <!-- ═══ HERO ═══ -->
+  <section style="position:relative;z-index:10;text-align:center;padding:4rem 1.5rem 3rem;max-width:64rem;margin:0 auto;">
+
+    <!-- Eyebrow badge -->
+    <div class="reveal" style="display:flex;justify-content:center;margin-bottom:1.5rem;">
+      <span class="badge-eyebrow">
+        <span style="width:0.5rem;height:0.5rem;border-radius:50%;background:#9d5bff;display:inline-block;animation:pulse 2s infinite;"></span>
+        Not a framework. Not an agent wrapper. A new computing paradigm.
+      </span>
     </div>
 
-    <h1 class="text-5xl md:text-7xl font-black tracking-tight leading-tight mb-6">
+    <!-- H1 -->
+    <h1 class="reveal reveal-delay-1" style="font-size:clamp(2.5rem,6vw,5.5rem);font-weight:900;line-height:1.05;letter-spacing:-0.03em;margin:0 0 1.5rem;text-wrap:balance;">
       The first language where<br />
       <span class="gradient-text">the LLM is the CPU.</span>
     </h1>
 
-    <p class="text-lg md:text-xl text-[var(--color-muted)] max-w-3xl mx-auto mb-6 leading-relaxed">
-      You write <strong class="text-white">.aic</strong> — plain Markdown, no code.<br class="hidden md:block" />
-      aiCompiler removes all ambiguity at compile time.<br class="hidden md:block" />
-      aiVM executes step by step. The LLM reads opcodes like a CPU reads machine code.
-    </p>
-
-    <!-- Positioning line -->
-    <div class="glass inline-flex px-5 py-3 mb-10 text-sm text-[var(--color-muted)] max-w-2xl mx-auto text-left">
-      <div class="space-y-1">
-        <div><span class="text-[var(--color-muted)]">LangChain / LangGraph →</span> <span class="text-white">developers orchestrate LLM steps in Python</span></div>
-        <div><span class="text-violet-400 font-bold">aiCompiler →</span> <span class="text-white">anyone writes intent in Markdown. LLM IS the runtime.</span></div>
-      </div>
+    <!-- Subheading — 3 clean lines, no wrapping mess -->
+    <div class="reveal reveal-delay-2" style="display:flex;flex-direction:column;gap:0.375rem;margin-bottom:1.75rem;color:var(--muted);font-size:clamp(0.95rem,2vw,1.1rem);line-height:1.7;">
+      <p style="margin:0;">You write <span class="badge-code">.aic</span> — plain Markdown, no code.</p>
+      <p style="margin:0;">aiCompiler resolves all ambiguity at compile time.</p>
+      <p style="margin:0;">aiVM executes step by step. <strong style="color:var(--text);">The LLM reads opcodes like a CPU reads machine code.</strong></p>
     </div>
 
-    <div class="flex flex-wrap items-center justify-center gap-4 mb-12">
-      <a href="#demo" class="btn-primary text-base px-8 py-3">▶ Try it now — no install, no signup</a>
-      <a href="https://github.com/theweekendprojects/ai-compiler" target="_blank" class="btn-ghost text-base px-8 py-3">View on GitHub</a>
+    <!-- Comparison box -->
+    <div class="reveal reveal-delay-3 compare-box" style="max-width:36rem;margin:0 auto 2rem;text-align:left;">
+      <div class="them">LangChain / LangGraph → developers orchestrate LLM steps in Python</div>
+      <div class="us"><span>aiCompiler</span> → anyone writes intent in Markdown. <span>LLM IS the runtime.</span></div>
     </div>
 
-    <!-- Pipeline visual -->
-    <div class="flex justify-center mb-4">
-      <div class="glass px-6 py-3 inline-flex">
-        <div class="pipeline text-sm">
+    <!-- CTAs -->
+    <div class="reveal reveal-delay-4" style="display:flex;flex-wrap:wrap;gap:0.875rem;justify-content:center;margin-bottom:2.5rem;">
+      <a href="#demo" class="btn-primary" style="font-size:1rem;padding:0.8rem 2rem;">▶ Try it now — no install, no signup</a>
+      <a href="https://github.com/theweekendprojects/ai-compiler" target="_blank" class="btn-ghost" style="font-size:1rem;padding:0.8rem 2rem;">View on GitHub</a>
+    </div>
+
+    <!-- Pipeline -->
+    <div class="reveal reveal-delay-5" style="display:flex;justify-content:center;margin-bottom:3rem;">
+      <div class="glass" style="padding:0.75rem 1.25rem;display:inline-flex;">
+        <div class="pipeline">
           <span class="pipeline-step source">.aic</span>
           <span class="pipeline-arrow">→</span>
           <span class="pipeline-step compile">aicompiler compile</span>
@@ -80,43 +84,32 @@ import "../styles/global.css";
     </div>
 
     <!-- Era table -->
-    <div class="mt-10 overflow-x-auto">
-      <table class="mx-auto text-sm border-collapse">
+    <div class="reveal" style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+      <table class="era-table" style="min-width:32rem;margin:0 auto;">
         <thead>
-          <tr class="text-[var(--color-muted)] text-xs uppercase tracking-wider">
-            <th class="px-6 py-2 text-left">Era</th>
-            <th class="px-6 py-2 text-left">Language</th>
-            <th class="px-6 py-2 text-left">Compiler</th>
-            <th class="px-6 py-2 text-left">CPU</th>
+          <tr>
+            <th>Era</th><th>Language</th><th>Compiler</th><th>CPU</th>
           </tr>
         </thead>
         <tbody>
-          {[
-            { era: "1950s", lang: "Assembly", compiler: "Assembler", cpu: "Silicon" },
-            { era: "1990s", lang: "Java", compiler: "javac", cpu: "JVM" },
-            { era: "2026", lang: ".aic", compiler: "aiCompiler", cpu: "LLM", highlight: true },
-          ].map(row => (
-            <tr class={row.highlight ? "text-white font-bold" : "text-[var(--color-muted)]"}>
-              <td class={`px-6 py-2 border-t border-[var(--color-border)] ${row.highlight ? "text-violet-400" : ""}`}>{row.era}</td>
-              <td class={`px-6 py-2 border-t border-[var(--color-border)] font-mono ${row.highlight ? "text-[var(--color-primary-glow)]" : ""}`}>{row.lang}</td>
-              <td class={`px-6 py-2 border-t border-[var(--color-border)] font-mono ${row.highlight ? "text-[var(--color-accent)]" : ""}`}>{row.compiler}</td>
-              <td class={`px-6 py-2 border-t border-[var(--color-border)] font-mono ${row.highlight ? "text-[var(--color-accent-2)]" : ""}`}>{row.cpu}</td>
-            </tr>
-          ))}
+          <tr><td>1950s</td><td>Assembly</td><td>Assembler</td><td>Silicon</td></tr>
+          <tr><td>1990s</td><td>Java</td><td>javac</td><td>JVM</td></tr>
+          <tr class="highlight"><td>2026</td><td>.aic</td><td>aiCompiler</td><td>LLM</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
-  <!-- Live Demo Section -->
-  <section id="demo" class="relative z-10 px-6 py-16">
-    <div class="max-w-6xl mx-auto">
-      <div class="text-center mb-10">
-        <h2 class="text-3xl md:text-4xl font-black mb-3">
+  <!-- ═══ DEMO ═══ -->
+  <section id="demo" style="position:relative;z-index:10;padding:5rem 1.5rem;">
+    <div style="max-width:82rem;margin:0 auto;">
+      <div style="text-align:center;margin-bottom:2.5rem;">
+        <h2 style="font-size:clamp(1.75rem,4vw,2.75rem);font-weight:900;letter-spacing:-0.03em;margin:0 0 0.875rem;text-wrap:balance;">
           Try it <span class="gradient-text">right now</span>
         </h2>
-        <p class="text-[var(--color-muted)] max-w-xl mx-auto">
-          Write a workflow in the editor. Watch aiCompiler resolve the intent. Watch aiVM execute it step by step — the LLM reading opcodes like a CPU.
+        <p style="color:var(--muted);max-width:36rem;margin:0 auto;font-size:0.95rem;line-height:1.7;text-wrap:balance;">
+          Write a workflow. Watch aiCompiler compile it to semantic opcodes.
+          Watch aiVM execute each step — the LLM reading opcodes like a CPU.
           No account. No install. No API key.
         </p>
       </div>
@@ -124,113 +117,120 @@ import "../styles/global.css";
     </div>
   </section>
 
-  <!-- How it works -->
-  <section id="how-it-works" class="relative z-10 px-6 py-16">
-    <div class="max-w-5xl mx-auto">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-black mb-3">How it <span class="gradient-text">works</span></h2>
-        <p class="text-[var(--color-muted)]">Three concepts. That's all you need to know.</p>
+  <!-- ═══ HOW IT WORKS ═══ -->
+  <section id="how-it-works" style="position:relative;z-index:10;padding:5rem 1.5rem;">
+    <div style="max-width:64rem;margin:0 auto;">
+      <div style="text-align:center;margin-bottom:3rem;">
+        <h2 style="font-size:clamp(1.75rem,4vw,2.75rem);font-weight:900;letter-spacing:-0.03em;margin:0 0 0.75rem;text-wrap:balance;">
+          How it <span class="gradient-text">works</span>
+        </h2>
+        <p style="color:var(--muted);font-size:0.95rem;">Three concepts. That's all you need to know.</p>
       </div>
 
-      <div class="grid md:grid-cols-3 gap-6">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:1.25rem;">
         {[
           {
-            step: "01",
-            icon: "✍️",
-            title: "Write a .aic file",
-            desc: "Write your program in plain English — workflows, steps, tools. No semicolons. No type annotations. No boilerplate. Just what you want to happen.",
-            badge: "source",
-            code: `# Workflow: Greeter\n\n## Steps\n\n### 1. SayHello\nSay hello to {name} creatively.`,
+            step:"01", icon:"✍️", badge:"source", title:"Write a .aic file",
+            desc:"Write your program in plain English — workflows, steps, tools. No semicolons. No type annotations. No boilerplate.",
+            code:`# Workflow: Greeter\n\n## Steps\n\n### 1. SayHello\nSay hello to {name} creatively.`,
           },
           {
-            step: "02",
-            icon: "⚡",
-            title: "Compile to .aix",
-            desc: "The AI Compiler parses your source file and produces bytecode — a structured JSON artifact enriched with tool bindings, model selection, and cache hints.",
-            badge: "compile",
-            code: `aicompiler compile app.aic\n→ app.aix ✓`,
+            step:"02", icon:"⚡", badge:"compile", title:"Compile to .aix",
+            desc:"The AI compiler parses your source file and produces bytecode — structured JSON opcodes with zero ambiguity.",
+            code:`aicompiler compile app.aic\n→ app.aix ✓`,
           },
           {
-            step: "03",
-            icon: "🚀",
-            title: "Run with aivm",
-            desc: "The AI VM reads the bytecode and executes each intent via the language model of your choice — Claude, Nova Micro, Gemini, and more.",
-            badge: "run",
-            code: `aivm run app.aix\n→ Hello, World! ✓`,
+            step:"03", icon:"🚀", badge:"run", title:"Run with aivm",
+            desc:"The AI VM reads each opcode and executes it — calling real tools, resolving data references, returning structured output.",
+            code:`aivm run app.aix\n→ Hello, World! ✓`,
           },
         ].map(item => (
-          <div class="feature-card relative overflow-hidden">
-            <div class="text-5xl font-black text-[var(--color-border)] absolute top-4 right-4 select-none leading-none">
-              {item.step}
-            </div>
-            <div class="text-3xl mb-3">{item.icon}</div>
-            <div class={`badge badge-${item.badge === "source" ? "purple" : item.badge === "compile" ? "cyan" : "green"} mb-3 text-xs`}>
-              {item.badge}
-            </div>
-            <h3 class="text-lg font-bold mb-2">{item.title}</h3>
-            <p class="text-[var(--color-muted)] text-sm mb-4 leading-relaxed">{item.desc}</p>
-            <pre class="text-xs font-mono text-[var(--color-accent-2)] bg-[var(--color-surface-2)] rounded-lg p-3 overflow-auto">{item.code}</pre>
+          <div class="glass-card" style="padding:1.5rem;position:relative;overflow:hidden;">
+            <div style="font-size:3.5rem;font-weight:900;color:rgba(255,255,255,0.04);position:absolute;top:0.75rem;right:1rem;line-height:1;pointer-events:none;user-select:none;">{item.step}</div>
+            <div style="font-size:1.75rem;margin-bottom:0.875rem;">{item.icon}</div>
+            <span class={`badge-${item.badge === 'source' ? 'purple' : item.badge === 'compile' ? 'cyan' : 'green'}`} style="display:inline-flex;align-items:center;padding:0.2rem 0.6rem;border-radius:9999px;font-size:0.7rem;font-weight:600;margin-bottom:0.75rem;">{item.badge}</span>
+            <h3 style="font-size:1.05rem;font-weight:700;margin:0 0 0.625rem;">{item.title}</h3>
+            <p style="color:var(--muted);font-size:0.85rem;line-height:1.65;margin:0 0 1rem;">{item.desc}</p>
+            <pre style="font-family:var(--font-mono);font-size:0.78rem;color:var(--accent-2);background:rgba(0,0,0,0.25);border-radius:0.5rem;padding:0.75rem;margin:0;overflow:hidden;white-space:pre-wrap;word-break:break-word;">{item.code}</pre>
           </div>
         ))}
       </div>
     </div>
   </section>
 
-  <!-- Features grid -->
-  <section id="features" class="relative z-10 px-6 py-16">
-    <div class="max-w-5xl mx-auto">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-black mb-3">Why developers care</h2>
-        <p class="text-[var(--color-muted)]">The framework era is ending. This is what comes next.</p>
+  <!-- ═══ WHY DEVELOPERS CARE ═══ -->
+  <section id="features" style="position:relative;z-index:10;padding:5rem 1.5rem;">
+    <div style="max-width:64rem;margin:0 auto;">
+      <div style="text-align:center;margin-bottom:3rem;">
+        <h2 style="font-size:clamp(1.75rem,4vw,2.75rem);font-weight:900;letter-spacing:-0.03em;margin:0 0 0.75rem;text-wrap:balance;">
+          Why developers care
+        </h2>
+        <p style="color:var(--muted);font-size:0.95rem;text-wrap:balance;">The framework era is ending. This is what comes next.</p>
       </div>
 
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:1rem;">
         {[
-          { icon: "⚙️", title: "LLM is the CPU", desc: "The LLM doesn't assist your code. It IS the runtime. Each opcode is a direct instruction to the model — no Python glue, no chain configuration." },
-          { icon: "🔀", title: "Swap any model", desc: "Claude, Nova Micro, Gemini, Llama — change one flag. All routed through Cloudflare AI Gateway. No rewrite." },
-          { icon: "🔒", title: "Deterministic builds", desc: ".aix lock files ensure the same source always compiles identically. Reproducible like javac. Version-controlled like code." },
-          { icon: "⚡", title: "Enrich between steps", desc: "Two-step pipeline like Java. Between compile and run: inject tool bindings, retry policies, security rules, provider selection per step." },
-          { icon: "🐛", title: "Debuggable by design", desc: "Every step produces a structured execution log. Not a blob of LLM output — named steps, inputs, outputs, durations, error handling." },
-          { icon: "🛠️", title: "Open source, MIT", desc: "Fork it. Build your own AI language on top of it. The .aix opcode format is an open spec." },
+          { icon:"⚙️", title:"LLM is the CPU",
+            desc:"The LLM doesn't assist your code. It IS the runtime. Each opcode is a direct instruction — no Python glue, no chain configuration." },
+          { icon:"🔀", title:"Swap any model",
+            desc:"Claude, Nova Micro, Gemini, Llama — change one flag. All routed through Cloudflare AI Gateway. No rewrite needed." },
+          { icon:"🔒", title:"Deterministic builds",
+            desc:".aix lock files ensure the same source always compiles identically. Reproducible like javac. Version-controlled like code." },
+          { icon:"⚡", title:"Enrich between steps",
+            desc:"Two-step pipeline like Java. Between compile and run: inject tool bindings, retry policies, security rules, provider selection per step." },
+          { icon:"🐛", title:"Debuggable by design",
+            desc:"Every step produces a structured log: name, inputs, outputs, duration, error handling. Not a blob of LLM output." },
+          { icon:"🛠️", title:"Open source, MIT",
+            desc:"Fork it. Build your own AI language on top of it. The .aix opcode format is an open spec." },
         ].map(f => (
-          <div class="feature-card">
-            <div class="text-2xl mb-3">{f.icon}</div>
-            <h3 class="font-bold mb-2">{f.title}</h3>
-            <p class="text-[var(--color-muted)] text-sm leading-relaxed">{f.desc}</p>
+          <div class="glass-card" style="padding:1.25rem;">
+            <div style="font-size:1.5rem;margin-bottom:0.75rem;">{f.icon}</div>
+            <h3 style="font-size:0.95rem;font-weight:700;margin:0 0 0.5rem;">{f.title}</h3>
+            <p style="color:var(--muted);font-size:0.82rem;line-height:1.65;margin:0;text-wrap:pretty;">{f.desc}</p>
           </div>
         ))}
       </div>
     </div>
   </section>
 
-  <!-- CTA -->
-  <section class="relative z-10 px-6 py-20 text-center">
-    <div class="max-w-2xl mx-auto">
-      <h2 class="text-4xl md:text-5xl font-black mb-6">
+  <!-- ═══ CTA ═══ -->
+  <section style="position:relative;z-index:10;padding:5rem 1.5rem;text-align:center;">
+    <div style="max-width:36rem;margin:0 auto;">
+      <h2 style="font-size:clamp(2rem,5vw,3.5rem);font-weight:900;letter-spacing:-0.03em;margin:0 0 1rem;text-wrap:balance;line-height:1.1;">
         The LLM is the CPU.<br /><span class="gradient-text">Try it in 30 seconds.</span>
       </h2>
-      <p class="text-[var(--color-muted)] text-lg mb-8">
+      <p style="color:var(--muted);font-size:1rem;margin:0 0 2rem;line-height:1.7;">
         No install. No account. No API key. Just open the playground and run.
       </p>
-      <div class="flex flex-wrap justify-center gap-4">
-        <a href="#demo" class="btn-primary text-base px-8 py-3">▶ Open the playground</a>
-        <a href="https://github.com/theweekendprojects/ai-compiler" target="_blank" class="btn-ghost text-base px-8 py-3">Star on GitHub ★</a>
+      <div style="display:flex;flex-wrap:wrap;gap:0.875rem;justify-content:center;">
+        <a href="#demo" class="btn-primary" style="font-size:1rem;padding:0.875rem 2rem;">▶ Open the playground</a>
+        <a href="https://github.com/theweekendprojects/ai-compiler" target="_blank" class="btn-ghost" style="font-size:1rem;padding:0.875rem 2rem;">Star on GitHub ★</a>
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="relative z-10 border-t border-[var(--color-border)] px-6 py-8">
-    <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-[var(--color-muted)]">
-      <div class="flex items-center gap-2">
-        <div class="w-6 h-6 rounded bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xs">AI</div>
-        <span>aicompiler.dev — by <a href="https://github.com/theweekendprojects" class="hover:text-white transition-colors">The Weekend Projects</a></span>
+  <!-- ═══ FOOTER ═══ -->
+  <footer style="position:relative;z-index:10;border-top:1px solid var(--border);padding:2rem 1.5rem;">
+    <div style="max-width:64rem;margin:0 auto;display:flex;flex-direction:column;gap:1rem;align-items:center;text-align:center;">
+      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--muted);">
+        <div style="width:1.25rem;height:1.25rem;border-radius:0.3rem;background:linear-gradient(135deg,#7c3aed,#06b6d4);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:0.6rem;">AI</div>
+        <span>aicompiler.dev — by <a href="https://github.com/theweekendprojects" style="color:inherit;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">The Weekend Projects</a></span>
       </div>
-      <div class="flex gap-5">
-        <a href="https://github.com/theweekendprojects/ai-compiler" target="_blank" class="hover:text-white transition-colors">GitHub</a>
-        <a href="https://github.com/theweekendprojects/ai-compiler/blob/main/LICENSE" target="_blank" class="hover:text-white transition-colors">MIT License</a>
-        <a href="https://github.com/theweekendprojects/ai-compiler/issues" target="_blank" class="hover:text-white transition-colors">Issues</a>
+      <div style="display:flex;flex-wrap:wrap;gap:1.5rem;justify-content:center;font-size:0.82rem;">
+        <a href="https://github.com/theweekendprojects/ai-compiler" target="_blank" style="color:var(--muted);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">GitHub</a>
+        <a href="https://github.com/theweekendprojects/ai-compiler/blob/main/LICENSE" target="_blank" style="color:var(--muted);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">MIT License</a>
+        <a href="https://github.com/theweekendprojects/ai-compiler/issues" target="_blank" style="color:var(--muted);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Issues</a>
       </div>
     </div>
   </footer>
+
+  <style>
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+    @media (max-width: 767px) {
+      .nav-links { display: none !important; }
+    }
+  </style>
 </Layout>
